@@ -74,8 +74,8 @@ sudo apt install git -y
 GIT_VERSION=$(git --version)
 print_success "Git berhasil diinstall: $GIT_VERSION"
 
-# 5. Clone StreamFlow repository
-print_status "Cloning StreamFlow repository..."
+# 5. Clone StreamDev repository
+print_status "Cloning StreamDev repository..."
 if [ -d "streamflow" ]; then
     print_warning "Folder streamflow sudah ada. Menghapus folder lama..."
     rm -rf streamflow
@@ -85,7 +85,7 @@ print_success "Repository berhasil di-clone"
 
 # 6. Masuk ke folder dan install dependencies
 print_status "Installing dependencies..."
-cd streamflow
+cd streamdev
 npm install
 print_success "Dependencies berhasil diinstall"
 
@@ -155,7 +155,7 @@ echo -e "${GREEN}================================${NC}"
 echo -e "${GREEN}   INSTALASI SELESAI!           ${NC}"
 echo -e "${GREEN}================================${NC}"
 echo ""
-print_success "StreamFlow berhasil diinstall dan berjalan!"
+print_success "StreamDev berhasil diinstall dan berjalan!"
 echo ""
 print_status "Informasi Akses:"
 SERVER_IP=$(curl -s ifconfig.me || curl -s icanhazip.com || echo "IP_SERVER")
@@ -172,7 +172,7 @@ echo "   - Cek status: pm2 status"
 echo "   - Restart app: pm2 restart streamflow"
 echo "   - Stop app: pm2 stop streamflow"
 echo "   - Lihat logs: pm2 logs streamflow"
-echo "   - Reset password: cd streamflow && node reset-password.js"
+echo "   - Reset password: cd streamdev && node reset-password.js"
 echo ""
 print_warning "CATATAN: Jangan lupa restart aplikasi setelah membuat akun pertama!"
 echo -e "${GREEN}================================${NC}"
