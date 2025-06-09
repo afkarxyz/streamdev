@@ -9,7 +9,7 @@ echo "================================"
 echo
 
 # Konfirmasi
-read -p "Mulai instalasi? (y/n): " -n 1 -r
+read -p "Lanjutkan instalasi? (y/n): " -n 1 -r
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo "Instalasi dibatalkan." && exit 1
 
@@ -30,6 +30,9 @@ cd streamdev
 echo "⚙️ Installing dependencies..."
 npm install
 npm run generate-secret
+
+echo "🕐 Setup timezone ke Asia/Jakarta..."
+sudo timedatectl set-timezone Asia/Jakarta
 
 echo "🔧 Setup firewall..."
 sudo ufw allow 7575
