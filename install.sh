@@ -4,7 +4,7 @@
 set -e
 
 echo "================================"
-echo "   StreamFlow Simple Installer  "
+echo "   StreamFlow Installer  "
 echo "================================"
 echo
 
