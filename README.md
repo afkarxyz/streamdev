@@ -1,6 +1,6 @@
 ## 🚀 Quick Install [StreamFlow](https://github.com/bangtutorial/streamflow)
 
-### Run Installation
+### Installation
 ```bash
 curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/install.sh && chmod +x install.sh && ./install.sh
 ```
