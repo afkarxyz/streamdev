@@ -2,7 +2,7 @@
 
 ### Run Installation
 ```bash
-curl -sSL https://raw.githubusercontent.com/afkarxyz/streamdev/main/install.sh | bash
+curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 ### Access Application
