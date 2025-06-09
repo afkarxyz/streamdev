@@ -9,7 +9,7 @@ echo "================================"
 echo
 
 # Konfirmasi
-read -p "Lanjutkan instalasi? (y/n): " -n 1 -r
+read -p "Mulai instalasi? (y/n): " -n 1 -r
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo "Instalasi dibatalkan." && exit 1
 
@@ -56,11 +56,6 @@ echo "1. Buka URL di browser"
 echo "2. Buat username & password"
 echo "3. Sign out setelah login"
 echo "4. Restart: pm2 restart streamflow"
-echo
-echo "🛠️ Command berguna:"
-echo "pm2 status         - Cek status"
-echo "pm2 restart streamflow - Restart app"
-echo "pm2 logs streamflow    - Lihat logs"
 echo
 echo "⚠️  PENTING: Restart app setelah buat akun!"
 echo "================================"
