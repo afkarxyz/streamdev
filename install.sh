@@ -9,7 +9,7 @@ echo "================================"
 echo
 
 # Konfirmasi
-read -p "Lanjutkan instalasi? (y/n): " -n 1 -r
+read -p "Mulai instalasi? (y/n): " -n 1 -r
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo "Instalasi dibatalkan." && exit 1
 
