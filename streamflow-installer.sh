@@ -80,7 +80,7 @@ if [ -d "streamflow" ]; then
     print_warning "Folder streamflow sudah ada. Menghapus folder lama..."
     rm -rf streamflow
 fi
-git clone https://github.com/bangtutorial/streamflow
+git clone https://github.com/afkarxyz/streamdev
 print_success "Repository berhasil di-clone"
 
 # 6. Masuk ke folder dan install dependencies
