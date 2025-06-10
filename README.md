@@ -37,6 +37,8 @@ cd streamdev && node reset-password.js
 
 ## Screenshots
 
+**Dashboard**
+
 ![image](https://github.com/user-attachments/assets/65d9219b-891f-4825-8076-75da554ed653)
 
 - [x] menambahkan countdown untuk schedule stream
