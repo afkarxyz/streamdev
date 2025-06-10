@@ -36,7 +36,7 @@ cd streamdev && node reset-password.js
 
 **Dashboard**
 
-![image](https://github.com/user-attachments/assets/76bfe0d0-e941-44f3-a8c7-b97d26dcef52)
+![image](https://github.com/user-attachments/assets/955ee49c-1c6e-4dba-859c-654bd164fa5c)
 
 - [x] menambahkan countdown untuk schedule stream
 - [x] menambahkan filter status stream
