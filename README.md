@@ -15,6 +15,7 @@ curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/ins
 ```bash
 cd streamdev && node reset-password.js
 ```
+
 ## TODO
 
 **Dashboard**
@@ -25,7 +26,6 @@ cd streamdev && node reset-password.js
 - [ ] tombol delete all/clear all video
 
 **Gallery**
-- [ ] reuse history stream
 - [ ] tiles/details view
 - [ ] menambahkan info waktu upload
 
