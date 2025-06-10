@@ -22,9 +22,6 @@ cd streamdev && node reset-password.js
 - [ ] fix waktu tidak sinkron saat edit schedule stream
 - [ ] fix stream yang tiba-tiba start 1 menit sebelum waktu yang dijadwalkan, misal jadwal 16:30, ternyata start live di 16:29
 
-**Gallery, History, Analitycs**
-- [ ] tombol delete all/clear all video
-
 **Gallery**
 - [ ] tiles/details view
 - [ ] menambahkan info waktu upload
@@ -39,8 +36,14 @@ cd streamdev && node reset-password.js
 
 **Dashboard**
 
-![image](https://github.com/user-attachments/assets/65d9219b-891f-4825-8076-75da554ed653)
+![image](https://github.com/user-attachments/assets/76bfe0d0-e941-44f3-a8c7-b97d26dcef52)
 
 - [x] menambahkan countdown untuk schedule stream
 - [x] menambahkan filter status stream
 - [x] auto refresh page saat live dimulai
+
+**Gallery, History, Analitycs**
+      
+![image](https://github.com/user-attachments/assets/2369562a-39a8-4c53-996b-e21387891e1e)
+
+- [x] tombol clear all
