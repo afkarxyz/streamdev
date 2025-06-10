@@ -24,8 +24,6 @@ cd streamdev && node reset-password.js
 - [x] menambahkan filter status stream
 - [x] auto refresh page saat live dimulai
 
-![image](https://github.com/user-attachments/assets/88bfc148-f983-4d18-8ad5-83565a2b78e5)
-
 **Gallery, History, Analitycs**
 - [ ] tombol delete all/clear all video
 
