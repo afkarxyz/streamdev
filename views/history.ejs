@@ -77,7 +77,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <i
-                      class="ti ti-brand-<%= helpers.getPlatformIcon(entry.platform) %> text-<%= helpers.getPlatformColor(entry.platform) %> mr-1.5"></i>
+                      class="ti ti-<%= helpers.getPlatformIcon(entry.platform) %> text-<%= helpers.getPlatformColor(entry.platform) %> mr-1.5"></i>
                     <span class="text-sm">
                       <%= entry.platform || 'Custom' %>
                     </span>
@@ -117,17 +117,17 @@
       </table>
     </div>
   </div>
-  <script>
+  <script>    
     function getPlatformIcon(platform) {
       switch (platform) {
-        case 'YouTube': return 'youtube';        
-        case 'Facebook': return 'facebook';
-        case 'Twitch': return 'twitch';
-        case 'TikTok': return 'tiktok';
+        case 'YouTube': return 'brand-youtube';        
+        case 'Facebook': return 'brand-facebook';
+        case 'Twitch': return 'brand-twitch';
+        case 'TikTok': return 'brand-tiktok';
         case 'Shopee Live': return 'shopping-bag';
         default: return 'broadcast';
       }
-    }
+    }    
     function getPlatformColor(platform) {
       switch (platform) {
         case 'YouTube': return 'red-500';        

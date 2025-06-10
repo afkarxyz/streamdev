@@ -1448,7 +1448,7 @@
           <div class="flex items-center justify-between mb-2">
             <div class="font-medium">${stream.title}</div>
             <div class="flex items-center text-sm">
-              <i class="ti ti-brand-${getPlatformIcon(stream.platform)} text-${getPlatformColor(stream.platform)} mr-1"></i>
+              <i class="ti ti-${getPlatformIcon(stream.platform)} text-${getPlatformColor(stream.platform)} mr-1"></i>
               <span>${stream.platform || 'Custom'}</span>
             </div>
           </div>
@@ -1557,7 +1557,7 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="flex items-center">
-            <i class="ti ti-brand-${getPlatformIcon(stream.platform)} text-${getPlatformColor(stream.platform)} mr-1.5"></i>
+            <i class="ti ti-${getPlatformIcon(stream.platform)} text-${getPlatformColor(stream.platform)} mr-1.5"></i>
             <span class="text-sm">${stream.platform || 'Custom'}</span>
           </div>
         </td>
@@ -1648,31 +1648,27 @@
           minute: '2-digit',
           hour12: false
         });
-      }
+      }      
       function getPlatformIcon(platform) {
         switch (platform) {
-          case 'YouTube': return 'youtube';
-          case 'Facebook': return 'facebook';
-          case 'Twitch': return 'twitch';
-          case 'TikTok': return 'tiktok';
-          case 'Instagram': return 'instagram';
+          case 'YouTube': return 'brand-youtube';
+          case 'Facebook': return 'brand-facebook';
+          case 'Twitch': return 'brand-twitch';
+          case 'TikTok': return 'brand-tiktok';
           case 'Shopee Live': return 'shopping-bag';
-          case 'Restream.io': return 'live-photo';
           default: return 'broadcast';
         }
-      }
+      }      
       function getPlatformColor(platform) {
         switch (platform) {
           case 'YouTube': return 'red-500';
           case 'Facebook': return 'blue-500';
           case 'Twitch': return 'purple-500';
           case 'TikTok': return 'gray-100';
-          case 'Instagram': return 'pink-500';
           case 'Shopee Live': return 'orange-500';
-          case 'Restream.io': return 'teal-500';
           default: return 'gray-400';
         }
-      }        
+      }
       function getStatusBadgeHTML(status, duration = '', view = 'desktop') {
         const getBgClass = (defaultBg) => {
           if (view === 'mobile') {
