@@ -4,13 +4,18 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">      
       <div>
-        <h1 class="text-2xl font-bold text-white">Video Analytics<% if (videos && videos.length > 0) { %> <span class="text-gray-400 text-2xl font-normal">(<%= videos.length %>)</span><% } %></h1>
+        <h1 class="text-2xl font-bold text-white">Video Analytics <span id="videoCount" class="text-gray-400 text-2xl font-normal"><% if (videos && videos.length > 0) { %>(<%= videos.length %>)<% } %></span></h1>
         <p class="text-gray-400 mt-1">Monitor your YouTube videos with real-time analytics</p>
+      </div>      
+      <div class="flex items-center gap-2 mt-4 sm:mt-0">        
+        <button id="addVideoBtn" class="w-24 h-10 bg-primary hover:bg-secondary px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+          <i class="ti ti-plus"></i>
+          <span>Add</span>
+        </button>        
+        <button id="clearAllAnalyticsBtn" class="w-24 h-10 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+          <i class="ti ti-trash"></i> <span>Clear</span>
+        </button>
       </div>
-      <button id="addVideoBtn" class="mt-4 sm:mt-0 bg-primary hover:bg-secondary px-4 py-2 rounded-lg font-medium transition-colors" style="display: none;">
-        <i class="ti ti-plus mr-2"></i>
-        Add Video
-      </button>
     </div>
     <!-- Video Analytics Container -->
     <div id="analyticsContainer" class="space-y-4">
@@ -95,12 +100,6 @@
         </button>
       </div>
     </form>  </div>
-</div>
-
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-16 right-4 bg-dark-800 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden flex items-center">
-  <i id="toast-icon" class="mr-2"></i>
-  <span id="toast-message"></span>
 </div>
 
 <!-- Analytics Card Template -->
@@ -267,6 +266,28 @@ class VideoAnalyticsManager {  constructor() {
     this.hideError();
     this.resetSubmitButton();
   }
+  updateClearButtonVisibility() {
+    const clearBtn = document.getElementById('clearAllAnalyticsBtn');
+    if (clearBtn) {
+      if (this.videos.size > 0) {
+        clearBtn.style.display = 'flex';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+    }
+    this.updateVideoCount();
+  }
+
+  updateVideoCount() {
+    const videoCountElement = document.getElementById('videoCount');
+    if (videoCountElement) {
+      if (this.videos.size > 0) {
+        videoCountElement.textContent = `(${this.videos.size})`;
+      } else {
+        videoCountElement.textContent = '';
+      }
+    }
+  }
 
   showError(message) {
     const errorDiv = document.getElementById('urlError');
@@ -292,7 +313,8 @@ class VideoAnalyticsManager {  constructor() {
 
   resetSubmitButton() {
     this.setSubmitLoading(false);
-  }  async handleAddVideo(e) {
+  }  
+  async handleAddVideo(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
@@ -327,10 +349,12 @@ class VideoAnalyticsManager {  constructor() {
     } finally {
       this.setSubmitLoading(false);
     }
-  }  addVideo(videoData) {
+  }  
+  addVideo(videoData) {
     this.videos.set(videoData.videoId, videoData);
     const totalVideos = this.videos.size;
     this.currentPage = Math.ceil(totalVideos / this.videosPerPage) - 1;
+    this.updateClearButtonVisibility();
   }async removeVideo(videoId) {
     const video = this.videos.get(videoId);
     const videoTitle = video ? video.title : 'this video';
@@ -347,13 +371,21 @@ class VideoAnalyticsManager {  constructor() {
       try {
         const response = await fetch(`/api/analytics/video/${videoId}`, {
           method: 'DELETE'
-        });        const result = await response.json();
-
+        });        
+        const result = await response.json();        
         if (result.success) {
           showToast('success', 'Video removed from analytics successfully');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
+          this.videos.delete(videoId);
+          this.updateClearButtonVisibility();
+          this.updateDisplay();
+          
+          const totalVideos = this.videos.size;
+          const totalPages = Math.ceil(totalVideos / this.videosPerPage);
+          if (this.currentPage >= totalPages && totalPages > 0) {
+            this.currentPage = totalPages - 1;
+          }
+          
+          this.updateDisplay();
         } else {
           console.error('Failed to remove video:', result.error);
           showToast('error', 'Failed to remove video from analytics');
@@ -369,8 +401,7 @@ class VideoAnalyticsManager {  constructor() {
     try {
       const response = await fetch('/api/analytics/videos');
       const result = await response.json();
-      
-      if (result.success) {
+        if (result.success) {
         this.videos.clear();
         result.data.forEach(video => {
           this.videos.set(video.videoId, video);
@@ -379,6 +410,8 @@ class VideoAnalyticsManager {  constructor() {
         if (result.data.length === 0) {
           await this.migrateFromLocalStorage();
         }
+        
+        this.updateClearButtonVisibility();
       } else {
         console.error('Failed to load videos from database:', result.error);
       }
@@ -428,7 +461,8 @@ class VideoAnalyticsManager {  constructor() {
     } catch (error) {
       console.error('Error during migration from localStorage:', error);
     }
-  }updateDisplay() {
+  }
+  updateDisplay() {
     const container = document.getElementById('analyticsContainer');
     const emptyState = document.getElementById('emptyState');
     const paginationControls = document.getElementById('paginationControls');
@@ -471,7 +505,8 @@ class VideoAnalyticsManager {  constructor() {
       this.populateCard(card, video);
       container.appendChild(card);
     }
-  }  updatePaginationControls() {
+  }  
+  updatePaginationControls() {
     const videosArray = Array.from(this.videos.values());
     const totalVideos = videosArray.length;
     const totalPages = Math.ceil(totalVideos / this.videosPerPage);
@@ -498,7 +533,8 @@ class VideoAnalyticsManager {  constructor() {
       this.renderCurrentVideo();
       this.updatePaginationControls();
     }
-  }  nextPage() {
+  }  
+  nextPage() {
     const totalVideos = this.videos.size;
     const totalPages = Math.ceil(totalVideos / this.videosPerPage);
     if (this.currentPage < totalPages - 1) {
@@ -550,26 +586,33 @@ class VideoAnalyticsManager {  constructor() {
       const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
       window.open(videoUrl, '_blank');
     });
-  }async refreshVideoData() {
-    const promises = Array.from(this.videos.keys()).map(async (videoId) => {
+  }
+  async refreshVideoData() {
+    const videosArray = Array.from(this.videos.values());
+    const startIndex = this.currentPage * this.videosPerPage;
+    const endIndex = Math.min(startIndex + this.videosPerPage, videosArray.length);
+    const currentVideos = videosArray.slice(startIndex, endIndex);
+    
+    const promises = currentVideos.map(async (video) => {
       try {
-        const response = await fetch(`/api/analytics/video-db/${videoId}`);
+        const response = await fetch(`/api/analytics/video-db/${video.videoId}`);
         const result = await response.json();
         
         if (result.success) {
-          this.videos.set(videoId, result.data);
+          this.videos.set(video.videoId, result.data);
         }
       } catch (error) {
-        console.error(`Error refreshing video ${videoId}:`, error);
+        console.error(`Error refreshing video ${video.videoId}:`, error);
       }
     });
 
     await Promise.all(promises);
     this.updateDisplay();
-  }
+  }  
   async startAutoRefresh() {
     await this.loadFromDatabase();
     this.updateDisplay();
+    this.updateClearButtonVisibility();
     
     this.refreshInterval = setInterval(() => {
       if (this.videos.size > 0) {
@@ -808,34 +851,93 @@ function createModalDialog(options) {
 }
 
 function showToast(type, message) {
-  const toast = document.getElementById('toast');
-  const toastIcon = document.getElementById('toast-icon');
-  const toastMessage = document.getElementById('toast-message');
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-4 right-4 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
   
+  let iconClass = '';
   if (type === 'success') {
-    toastIcon.className = 'ti ti-check text-green-400 mr-2';
-    toast.classList.add('border-l-4', 'border-green-400');
-    toast.classList.remove('border-l-4', 'border-red-400', 'border-yellow-400');
+    iconClass = 'ti ti-check text-green-400';
   } else if (type === 'error') {
-    toastIcon.className = 'ti ti-x text-red-400 mr-2';
-    toast.classList.add('border-l-4', 'border-red-400');
-    toast.classList.remove('border-l-4', 'border-green-400', 'border-yellow-400');
+    iconClass = 'ti ti-x text-red-400';
   } else if (type === 'warning') {
-    toastIcon.className = 'ti ti-alert-triangle text-yellow-400 mr-2';
-    toast.classList.add('border-l-4', 'border-yellow-400');
-    toast.classList.remove('border-l-4', 'border-green-400', 'border-red-400');
+    iconClass = 'ti ti-alert-triangle text-yellow-400';
+  } else {
+    iconClass = 'ti ti-info-circle text-blue-400';
   }
   
-  toastMessage.textContent = message;
-  toast.classList.remove('hidden');
-  
+  toast.innerHTML = `
+    <div class="flex items-center">
+      <i class="${iconClass} mr-2"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(20px); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    .animate-fade-out {
+      animation: fadeOut 0.3s ease-out forwards;
+    }
+  `;
+  document.head.appendChild(style);
   setTimeout(() => {
-    toast.classList.add('hidden');
+    toast.classList.remove('animate-fade-in');
+    toast.classList.add('animate-fade-out');
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 300);      
   }, 3000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new VideoAnalyticsManager();
+  window.analyticsManagerInstance = new VideoAnalyticsManager();
+  document.getElementById('clearAllAnalyticsBtn').addEventListener('click', async function() {
+    const manager = window.analyticsManagerInstance;
+    if (!manager || manager.videos.size === 0) {
+      showToast('info', 'No videos to clear');
+      return;
+    }
+    const ids = Array.from(manager.videos.keys());
+    createModalDialog({
+      type: 'danger',
+      icon: 'ti-trash',
+      title: 'Clear All Analytics',
+      message: `Are you sure you want to remove all videos from analytics? This action cannot be undone.`,
+      confirmText: 'Delete All',
+      cancelText: 'Cancel'
+    }).then(async result => {
+      if (result.confirmed) {
+        const modal = document.getElementById('custom-modal');
+        if (modal) {
+          modal.remove();
+        }
+        const btn = document.getElementById('clearAllAnalyticsBtn');
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'pointer-events-none');        try {
+          await Promise.all(ids.map(id => fetch(`/api/analytics/video/${id}`, { method: 'DELETE' }))); 
+          manager.videos.clear();
+          manager.updateDisplay();
+          manager.updateClearButtonVisibility();
+          showToast('success', 'All analytics videos removed successfully');
+        } catch (e) {
+          showToast('error', 'Failed to remove all analytics videos');
+        } finally {
+          btn.disabled = false;
+          btn.classList.remove('opacity-60', 'pointer-events-none');
+        }
+      }
+    });
+  });
 });
 </script>
 

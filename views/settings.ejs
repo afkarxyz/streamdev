@@ -391,20 +391,57 @@
             form.submit();
           }        });
       });
-      
-      function showToast(type, message) {
-        const toast = document.getElementById('toast');
-        const toastIcon = document.getElementById('toast-icon');
-        const toastMessage = document.getElementById('toast-message');
-        if (type === 'error') {
-          toastIcon.className = 'ti ti-x text-red-400 mr-2';
-          toast.classList.add('border-l-4', 'border-red-400');
-          toast.classList.remove('border-l-4', 'border-green-400');
+        function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+        
+        let iconClass = '';
+        if (type === 'success') {
+          iconClass = 'ti ti-check text-green-400';
+        } else if (type === 'error') {
+          iconClass = 'ti ti-x text-red-400';
+        } else if (type === 'warning') {
+          iconClass = 'ti ti-alert-triangle text-yellow-400';
+        } else {
+          iconClass = 'ti ti-info-circle text-blue-400';
         }
-        toastMessage.textContent = message;
-        toast.classList.remove('hidden');
+        
+        toast.innerHTML = `
+          <div class="flex items-center">
+            <i class="${iconClass} mr-2"></i>
+            <span>${message}</span>
+          </div>
+        `;
+        document.body.appendChild(toast);
+
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+          }
+          .animate-fade-out {
+            animation: fadeOut 0.3s ease-in;
+          }
+        `;
+        if (!document.querySelector('style[data-toast-styles]')) {
+          style.setAttribute('data-toast-styles', 'true');
+          document.head.appendChild(style);
+        }
+
         setTimeout(() => {
-          toast.classList.add('hidden');
+          toast.classList.remove('animate-fade-in');
+          toast.classList.add('animate-fade-out');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
         }, 3000);
       }
 

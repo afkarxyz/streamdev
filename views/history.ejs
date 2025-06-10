@@ -18,8 +18,12 @@
           <option value="Twitch">Twitch</option>
           <option value="TikTok">TikTok</option>
           <option value="Custom">Custom</option>
-        </select>
-      </div>
+        </select>      
+      </div>      
+      <button id="clear-all-history" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 h-[40px]<% if (!history || history.length === 0) { %> hidden<% } %>">
+        <i class="ti ti-trash"></i> 
+        <span class="hidden sm:inline">Clear</span>
+      </button>
     </div>
   </div>
   
@@ -151,7 +155,8 @@
       const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
       const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
       return `${hours}:${minutes}:${secs}`;
-    }    function deleteHistoryEntry(id, title) {
+    }    
+    function deleteHistoryEntry(id, title) {
       createModalDialog({
         type: 'danger',
         icon: 'ti-trash',
@@ -214,7 +219,7 @@
             });
         }
       });
-    }
+    }    
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.getElementById('history-search');
       const platformFilter = document.getElementById('platform-filter');
@@ -252,14 +257,18 @@
       }
       searchInput.addEventListener('input', filterTable);
       platformFilter.addEventListener('change', filterTable);
-    });    
+    });      
     function showToast(type, message) {
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-4 right-4 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
       
       let iconClass = '';
-      if (type === 'error') {
+      if (type === 'success') {
+        iconClass = 'ti ti-check text-green-400';
+      } else if (type === 'error') {
         iconClass = 'ti ti-x text-red-400';
+      } else if (type === 'warning') {
+        iconClass = 'ti ti-alert-triangle text-yellow-400';
       } else {
         iconClass = 'ti ti-info-circle text-blue-400';
       }
@@ -407,5 +416,61 @@
         }
       });
     }
+    document.getElementById('clear-all-history').addEventListener('click', async function() {
+      const rows = Array.from(document.querySelectorAll('#history-table-body tr[data-id]'));
+      if (rows.length === 0) {
+        showToast('info', 'No history to clear');
+        return;
+      }
+      const ids = rows.map(row => row.getAttribute('data-id'));
+      createModalDialog({
+        type: 'danger',
+        icon: 'ti-trash',
+        title: 'Clear All History',
+        message: `Are you sure you want to delete all history entries? This action cannot be undone.`,
+        confirmText: 'Delete All',
+        cancelText: 'Cancel'
+      }).then(async result => {
+        if (result.confirmed) {
+          const modal = document.getElementById('custom-modal');
+          if (modal) {
+            document.body.classList.remove('overflow-hidden');
+            modal.remove();
+          }
+          const btn = document.getElementById('clear-all-history');
+          btn.disabled = true;
+          btn.classList.add('opacity-60', 'pointer-events-none');
+          try {
+            await Promise.all(ids.map(id => fetch(`/api/history/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } }) ));
+            rows.forEach(row => {
+              row.classList.add('animate-fade-out');
+              setTimeout(() => row.remove(), 300);
+            });
+            setTimeout(() => {
+              const tableBody = document.getElementById('history-table-body');
+              tableBody.innerHTML = `
+                <tr>
+                  <td colspan="6" class="px-6 py-10 text-center text-gray-400">
+                    <div class="flex flex-col items-center">
+                      <i class="ti ti-history text-3xl mb-2"></i>
+                      <p>No stream history found</p>
+                      <p class="text-xs mt-1">Your completed streams will appear here</p>
+                    </div>
+                  </td>
+                </tr>
+              `;
+              const countSpan = document.querySelector('h2 span.text-gray-400');
+              if (countSpan) countSpan.textContent = '';
+            }, 350);
+            showToast('success', 'All history entries deleted successfully');
+          } catch (e) {
+            showToast('error', 'Failed to delete all history entries');
+          } finally {
+            btn.disabled = false;
+            btn.classList.remove('opacity-60', 'pointer-events-none');
+          }
+        }
+      });
+    });
 
   </script>
