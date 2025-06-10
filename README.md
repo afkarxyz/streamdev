@@ -24,6 +24,11 @@ cd streamdev && node reset-password.js
 **Gallery, History, Analitycs**
 - [ ] tombol delete all/clear all video
 
+**Gallery**
+- [ ] reuse history stream
+- [ ] tiles/details view
+- [ ] menambahkan info waktu upload
+
 **History**
 - [ ] reuse history stream
 
