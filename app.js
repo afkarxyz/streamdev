@@ -65,9 +65,7 @@ app.locals.helpers = {
       case 'Facebook': return 'facebook';
       case 'Twitch': return 'twitch';
       case 'TikTok': return 'tiktok';
-      case 'Instagram': return 'instagram';
       case 'Shopee Live': return 'shopping-bag';
-      case 'Restream.io': return 'live-photo';
       default: return 'broadcast';
     }
   },
@@ -77,9 +75,7 @@ app.locals.helpers = {
       case 'Facebook': return 'blue-500';
       case 'Twitch': return 'purple-500';
       case 'TikTok': return 'gray-100';
-      case 'Instagram': return 'pink-500';
       case 'Shopee Live': return 'orange-500';
-      case 'Restream.io': return 'teal-500';
       default: return 'gray-400';
     }
   },
@@ -1613,15 +1609,9 @@ app.post('/api/streams', isAuthenticated, [
     } else if (req.body.rtmpUrl.includes('tiktok.com')) {
       platform = 'TikTok';
       platform_icon = 'ti-brand-tiktok';
-    } else if (req.body.rtmpUrl.includes('instagram.com')) {
-      platform = 'Instagram';
-      platform_icon = 'ti-brand-instagram';
     } else if (req.body.rtmpUrl.includes('shopee.io')) {
       platform = 'Shopee Live';
       platform_icon = 'ti-brand-shopee';
-    } else if (req.body.rtmpUrl.includes('restream.io')) {
-      platform = 'Restream.io';
-      platform_icon = 'ti-live-photo';
     }
     const streamData = {
       title: req.body.streamTitle,

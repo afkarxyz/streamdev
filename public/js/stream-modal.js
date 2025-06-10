@@ -371,15 +371,11 @@ document.addEventListener('DOMContentLoaded', function () {
       } else if (url.includes('facebook.com')) {
         currentPlatform = 'Facebook';
       } else if (url.includes('twitch.tv')) {
-        currentPlatform = 'Twitch';
+        currentPlatform = 'Twitch';      
       } else if (url.includes('tiktok.com')) {
         currentPlatform = 'TikTok';
-      } else if (url.includes('instagram.com')) {
-        currentPlatform = 'Instagram';
       } else if (url.includes('shopee.io')) {
         currentPlatform = 'Shopee Live';
-      } else if (url.includes('restream.io')) {
-        currentPlatform = 'Restream.io';
       } else {
         currentPlatform = 'Custom';
       }

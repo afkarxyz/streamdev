@@ -1672,26 +1672,33 @@
           case 'Restream.io': return 'teal-500';
           default: return 'gray-400';
         }
-      }      
+      }        
       function getStatusBadgeHTML(status, duration = '', view = 'desktop') {
         const getBgClass = (defaultBg) => {
           if (view === 'mobile') {
-            return 'bg-gray-700/70';
+            switch (status) {
+              case 'live':
+                return 'bg-red-500 text-white';
+              case 'scheduled':
+                return 'bg-yellow-500 text-black';
+              case 'offline':
+              default:
+                return 'bg-gray-500 text-white';
+            }
           }
           return defaultBg;
         };
-        
-        switch (status) {
+          switch (status) {          
           case 'live':
             return `
-            <span class="flex items-center ${getBgClass('bg-red-400/10')} text-red-400 rounded-full px-2.5 py-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse mr-1.5"></span>
+            <span class="flex items-center ${getBgClass('bg-red-400/10 text-red-400')} rounded-full px-2.5 py-1">
+              <span class="w-1.5 h-1.5 rounded-full ${view === 'mobile' ? 'bg-white' : 'bg-red-400'} animate-pulse mr-1.5"></span>
               <span class="text-xs font-medium">Live${duration ? ' • ' + duration : ''}</span>
             </span>
           `;
           case 'scheduled':
             return `
-            <span class="flex items-center ${getBgClass('bg-yellow-500/10')} text-yellow-500 rounded-full px-2.5 py-1">
+            <span class="flex items-center ${getBgClass('bg-yellow-500/10 text-yellow-500')} rounded-full px-2.5 py-1">
               <i class="ti ti-calendar-event text-xs mr-1.5"></i>
               <span class="text-xs font-medium">Scheduled</span>
             </span>
@@ -1699,7 +1706,7 @@
           case 'offline':
           default:
             return `
-            <span class="flex items-center ${getBgClass('bg-gray-700')} text-gray-400 rounded-full px-2.5 py-1">
+            <span class="flex items-center ${getBgClass('bg-gray-700 text-gray-400')} rounded-full px-2.5 py-1">
               <i class="ti ti-zzz text-xs mr-1.5"></i>
               <span class="text-xs font-medium">Offline</span>
             </span>
@@ -1718,12 +1725,12 @@
               class="${btnClass} bg-red-500 hover:bg-red-600">
               Stop
             </button>
-          `;
+          `;          
           case 'scheduled':
             return `
             <button
               onclick="cancelSchedule('${streamId}')"
-              class="${btnClass} bg-yellow-500 hover:bg-yellow-600">
+              class="${btnClass} bg-yellow-500 hover:bg-yellow-600 text-black">
               Cancel
             </button>
           `;
