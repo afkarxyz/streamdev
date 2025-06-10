@@ -123,13 +123,12 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="mt-8">
+  </div>  <div class="mt-8">
     <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
       <h2 class="text-xl font-bold">Streaming Status</h2>
       <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
         <div class="relative w-full sm:w-64">
-          <input type="text" placeholder="Search streams..."
+          <input type="text" id="searchInput" placeholder="Search streams..."
             class="w-full bg-dark-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
           <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
         </div>
@@ -138,6 +137,68 @@
           <i class="ti ti-plus"></i>
           <span>New Stream</span>
         </button>
+      </div>
+    </div>
+      <!-- Stream Tabs -->
+    <div class="mb-6">
+      <!-- Mobile Tabs - Compact with icons only -->
+      <div class="md:hidden border-b border-gray-700">
+        <nav class="-mb-px flex justify-around">
+          <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-primary border-primary" 
+                  data-tab="all" onclick="switchTab('all')">
+            <div class="flex items-center">
+              <i class="ti ti-list text-lg"></i>
+              <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="all-count-mobile">0</span>
+            </div>
+          </button>
+          <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="live" onclick="switchTab('live')">
+            <div class="flex items-center">
+              <i class="ti ti-broadcast text-lg"></i>
+              <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="live-count-mobile">0</span>
+            </div>
+          </button>
+          <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="scheduled" onclick="switchTab('scheduled')">
+            <div class="flex items-center">
+              <i class="ti ti-calendar-event text-lg"></i>
+              <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="scheduled-count-mobile">0</span>
+            </div>
+          </button>
+          <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="offline" onclick="switchTab('offline')">
+            <div class="flex items-center">
+              <i class="ti ti-zzz text-lg"></i>
+              <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="offline-count-mobile">0</span>
+            </div>
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Desktop Tabs - Full with text labels -->
+      <div class="hidden md:block border-b border-gray-700">
+        <nav class="-mb-px flex space-x-8">
+          <button class="stream-tab py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 text-primary border-primary" 
+                  data-tab="all" onclick="switchTab('all')">
+            <i class="ti ti-list mr-2"></i>All Streams
+            <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300" id="all-count">0</span>
+          </button>
+          <button class="stream-tab py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="live" onclick="switchTab('live')">
+            <i class="ti ti-broadcast mr-2"></i>Live
+            <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300" id="live-count">0</span>
+          </button>
+          <button class="stream-tab py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="scheduled" onclick="switchTab('scheduled')">
+            <i class="ti ti-calendar-event mr-2"></i>Scheduled
+            <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300" id="scheduled-count">0</span>
+          </button>
+          <button class="stream-tab py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
+                  data-tab="offline" onclick="switchTab('offline')">
+            <i class="ti ti-zzz mr-2"></i>Offline
+            <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300" id="offline-count">0</span>
+          </button>
+        </nav>
       </div>
     </div>
     <div class="block md:hidden space-y-4">
@@ -527,11 +588,13 @@
                       <input type="text" id="editRtmpUrl" name="rtmpUrl"
                         class="w-full pl-10 pr-12 py-2.5 bg-dark-700 border border-gray-600 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
                         placeholder="RTMP URL" required>
-                      <i class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>                      <button type="button" id="editPlatformSelector"
+                      <i class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>                      
+                      <button type="button" id="editPlatformSelector"
                         class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
                         aria-label="Select platform">
                         <i class="ti ti-list-check text-gray-400 hover:text-white transition-colors"></i>
-                      </button>                      <div id="editPlatformDropdown"
+                      </button>                      
+                      <div id="editPlatformDropdown"
                         class="hidden absolute z-10 right-0 mt-1 w-48 bg-dark-700 rounded-lg border border-gray-600 shadow-lg overflow-hidden">
                         <div class="py-1">
                           <button type="button"
@@ -915,7 +978,7 @@
     }
     .group:hover .group-hover\:block {
       animation: fadeIn 0.2s;
-    }
+    }    
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -924,6 +987,74 @@
       to {
         opacity: 1;
         transform: translate(-50%, 0);
+      }
+    }
+
+    .countdown-timer {
+      font-family: 'Courier New', monospace;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .countdown-part {
+      display: inline-block;
+      position: relative;
+      margin: 0 2px;
+      font-weight: 700;
+      font-size: 1.1em;
+    }
+
+    .countdown-label {
+      font-size: 0.7em;
+      font-weight: 500;
+      opacity: 0.8;
+      margin-left: 1px;
+    }
+
+    .countdown-timer .countdown-part:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+
+    .stream-tab {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stream-tab::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: currentColor;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .stream-tab.text-primary::before {
+      transform: scaleX(1);
+    }
+
+    .bg-gradient-to-r.from-yellow-500\/20 {
+      animation: gentle-glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes gentle-glow {
+      0% {
+        box-shadow: 0 0 5px rgba(234, 179, 8, 0.3);
+      }
+      100% {
+        box-shadow: 0 0 15px rgba(234, 179, 8, 0.5);
       }
     }
   </style>
@@ -1125,14 +1256,16 @@
             confirmText: 'OK'
           });
         });
-    });
+    });    
     document.addEventListener('DOMContentLoaded', function () {
       fetch('/api/streams')
         .then(response => response.json())
         .then(data => {
           if (data.success) {
+            window.allStreams = data.streams;
             displayStreams(data.streams);
             updateStreamCounters(data.streams);
+            setupSearch();
           } else {
             console.error('Error fetching streams:', data.error);
             showEmptyState();
@@ -1141,10 +1274,90 @@
         .catch(error => {
           console.error('Error fetching streams:', error);
           showEmptyState();
-        });      function updateStreamCounters(streams) {
+        });
+
+      let currentTab = 'all';
+      window.currentTab = currentTab;
+
+      function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const filtered = window.allStreams.filter(stream => 
+              stream.title.toLowerCase().includes(searchTerm) ||
+              (stream.platform && stream.platform.toLowerCase().includes(searchTerm))
+            );
+            displayFilteredStreams(filtered);
+          });
+        }
+      }
+
+      function displayFilteredStreams(streams) {
+        const filteredByTab = filterStreamsByTab(streams, window.currentTab);
+        displayMobileStreams(filteredByTab);
+        displayDesktopStreams(filteredByTab);
+      }
+
+      window.switchTab = function(tab) {
+        window.currentTab = tab;
+        
+        document.querySelectorAll('.stream-tab').forEach(tabEl => {
+          tabEl.classList.remove('text-primary', 'border-primary');
+          tabEl.classList.add('text-gray-400', 'border-transparent');
+        });
+        
+        const activeTab = document.querySelector(`[data-tab="${tab}"]`);
+        if (activeTab) {
+          activeTab.classList.remove('text-gray-400', 'border-transparent');
+          activeTab.classList.add('text-primary', 'border-primary');
+        }
+        
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        
+        let filtered = window.allStreams;
+        if (searchTerm) {
+          filtered = filtered.filter(stream => 
+            stream.title.toLowerCase().includes(searchTerm) ||
+            (stream.platform && stream.platform.toLowerCase().includes(searchTerm))
+          );
+        }
+        
+        const filteredByTab = filterStreamsByTab(filtered, tab);
+        displayMobileStreams(filteredByTab);
+        displayDesktopStreams(filteredByTab);
+      };
+
+      function filterStreamsByTab(streams, tab) {
+        switch(tab) {
+          case 'live':
+            return streams.filter(stream => stream.status === 'live');
+          case 'scheduled':
+            return streams.filter(stream => stream.status === 'scheduled');
+          case 'offline':
+            return streams.filter(stream => stream.status === 'offline');
+          default:
+            return streams;
+        }
+      }      function updateStreamCounters(streams) {
         const liveStreams = streams.filter(stream => stream.status === 'live').length;
+        const scheduledStreams = streams.filter(stream => stream.status === 'scheduled').length;
+        const offlineStreams = streams.filter(stream => stream.status === 'offline').length;
+        const allStreams = streams.length;
+
         document.querySelector('.hidden.md\\:grid .bg-gray-800:nth-child(1) p.text-3xl').textContent = liveStreams;
         document.querySelector('.grid.grid-cols-2.md\\:hidden .bg-gray-800:nth-child(1) p.text-xl').textContent = liveStreams;
+        
+        document.getElementById('all-count').textContent = allStreams;
+        document.getElementById('live-count').textContent = liveStreams;
+        document.getElementById('scheduled-count').textContent = scheduledStreams;
+        document.getElementById('offline-count').textContent = offlineStreams;
+        
+        document.getElementById('all-count-mobile').textContent = allStreams;
+        document.getElementById('live-count-mobile').textContent = liveStreams;
+        document.getElementById('scheduled-count-mobile').textContent = scheduledStreams;
+        document.getElementById('offline-count-mobile').textContent = offlineStreams;
       }
       function displayStreams(streams) {
         if (!streams || streams.length === 0) {
@@ -1189,11 +1402,11 @@
           const now = new Date();
           const durationMs = now - startTime;
           const hours = Math.floor(durationMs / (1000 * 60 * 60)).toString().padStart(2, '0');
-          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');          
           const seconds = Math.floor((durationMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
           durationDisplay = `${hours}:${minutes}:${seconds}`;
         }
-        const statusBadge = getStatusBadgeHTML(stream.status);
+        const statusBadge = getStatusBadgeHTML(stream.status, '', 'mobile');
         const startDate = stream.start_time ? formatDate(new Date(stream.start_time)) : '';
         const scheduleDate = stream.schedule_time ? formatDate(new Date(stream.schedule_time)) : '';
         const scheduleTime = stream.schedule_time ? formatTime(new Date(stream.schedule_time)) : '';
@@ -1216,14 +1429,15 @@
             formattedDuration = `${stream.duration} min`;
           }
         }
-        card.innerHTML = `
+        card.innerHTML = `        
         <div class="relative">
           <div class="bg-dark-700 aspect-video relative">
             <img src="${thumbnail}" class="w-full h-full object-cover" alt="${stream.title}">
-            <div class="absolute top-2 right-2">
-              ${statusBadge}
-            </div>            ${stream.status === 'live' ? `
-            <div class="absolute bottom-2 right-2 bg-black/70 rounded px-1.5 py-0.5 min-w-[4rem] text-center">
+            <div class="absolute top-2 left-2">
+              ${statusBadge}            
+            </div>            
+            ${stream.status === 'live' ? `
+            <div class="absolute bottom-2 right-2 bg-black/70 rounded-full px-2.5 py-1.5 min-w-[4rem] flex items-center justify-center">
               <span class="text-xs font-medium text-white tabular-nums">
                 <span class="live-duration" data-start-time="${stream.start_time}">${durationDisplay}</span>
               </span>
@@ -1244,11 +1458,24 @@
           <div class="flex items-center text-sm text-gray-400 mb-2">
             <i class="ti ti-clock mr-1.5"></i>
             <span>Duration: ${formattedDuration}</span>
-          </div>
+          </div>          
           ${stream.status === 'scheduled' ? `
-          <div class="flex items-center text-sm text-yellow-500 mb-3">
-            <i class="ti ti-calendar-event mr-1.5"></i>
-            <span>Starts ${scheduleDate} • ${scheduleTime}</span>
+          <div class="bg-yellow-500/10 rounded-lg p-4 mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center text-yellow-500">
+                <i class="ti ti-calendar-event mr-2"></i>
+                <span class="font-semibold">Starts in:</span>
+              </div>
+              <i class="ti ti-clock text-yellow-500 animate-pulse"></i>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-white countdown-timer" data-schedule-time="${stream.schedule_time}">
+                Loading...
+              </div>
+              <div class="text-sm text-yellow-400 mt-1">
+                ${scheduleDate} at ${scheduleTime}
+              </div>
+            </div>
           </div>` : `
           <div class="flex items-center text-sm text-gray-400 mb-3">
             <i class="ti ti-calendar mr-1.5"></i>
@@ -1302,10 +1529,9 @@
               <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse mr-1.5"></span>
               <span class="text-xs font-medium">Live • <span class="live-duration tabular-nums" data-start-time="${stream.start_time}">
                 ${durationDisplay}</span></span>
-            </span>
-          `;
+            </span>          `;
         } else {
-          statusBadge = getStatusBadgeHTML(stream.status);
+          statusBadge = getStatusBadgeHTML(stream.status, '', 'desktop');
         }
         let formattedDuration = '—';
         if (stream.duration) {
@@ -1338,11 +1564,24 @@
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm text-gray-400">${formatDate(startDate) || '--'}</div>
           ${startDate ? `<div class="text-xs text-gray-500">Started: ${formatTime(startDate)}</div>` : ''}
-        </td>
+        </td>        
         <td class="px-6 py-4 whitespace-nowrap">
           ${scheduleDate
-            ? `<div class="text-sm text-yellow-500 font-medium">${formatDate(scheduleDate)}</div>
-               <div class="text-xs text-gray-400">${formatTime(scheduleDate)}</div>`
+            ? stream.status === 'scheduled' 
+              ? `<div class="bg-yellow-500/10 rounded-lg p-3">
+                   <div class="flex items-center text-yellow-500 mb-1">
+                     <i class="ti ti-clock animate-pulse mr-1"></i>
+                     <span class="text-xs font-semibold">Starts in:</span>
+                   </div>
+                   <div class="text-sm font-bold text-white countdown-timer" data-schedule-time="${stream.schedule_time}">
+                     Loading...
+                   </div>
+                   <div class="text-xs text-yellow-400 mt-1">
+                     ${formatDate(scheduleDate)} at ${formatTime(scheduleDate)}
+                   </div>
+                 </div>`
+              : `<div class="text-sm text-yellow-500 font-medium">${formatDate(scheduleDate)}</div>
+                 <div class="text-xs text-gray-400">${formatTime(scheduleDate)}</div>`
             : `<div class="text-sm">--</div>`}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
@@ -1433,19 +1672,26 @@
           case 'Restream.io': return 'teal-500';
           default: return 'gray-400';
         }
-      }
-      function getStatusBadgeHTML(status, duration = '') {
+      }      
+      function getStatusBadgeHTML(status, duration = '', view = 'desktop') {
+        const getBgClass = (defaultBg) => {
+          if (view === 'mobile') {
+            return 'bg-gray-700/70';
+          }
+          return defaultBg;
+        };
+        
         switch (status) {
           case 'live':
             return `
-            <span class="flex items-center bg-red-400/10 text-red-400 rounded-full px-2.5 py-1">
+            <span class="flex items-center ${getBgClass('bg-red-400/10')} text-red-400 rounded-full px-2.5 py-1">
               <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse mr-1.5"></span>
               <span class="text-xs font-medium">Live${duration ? ' • ' + duration : ''}</span>
             </span>
           `;
           case 'scheduled':
             return `
-            <span class="flex items-center bg-yellow-500/10 text-yellow-500 rounded-full px-2.5 py-1">
+            <span class="flex items-center ${getBgClass('bg-yellow-500/10')} text-yellow-500 rounded-full px-2.5 py-1">
               <i class="ti ti-calendar-event text-xs mr-1.5"></i>
               <span class="text-xs font-medium">Scheduled</span>
             </span>
@@ -1453,8 +1699,8 @@
           case 'offline':
           default:
             return `
-            <span class="flex items-center bg-gray-700 text-gray-400 rounded-full px-2.5 py-1">
-              <i class="ti ti-circle-dot text-xs mr-1.5"></i>
+            <span class="flex items-center ${getBgClass('bg-gray-700')} text-gray-400 rounded-full px-2.5 py-1">
+              <i class="ti ti-zzz text-xs mr-1.5"></i>
               <span class="text-xs font-medium">Offline</span>
             </span>
           `;
@@ -1462,8 +1708,8 @@
       }
       function getActionButtonHTML(status, streamId, view = 'desktop') {
         const btnClass = view === 'mobile'
-          ? 'px-4 py-1.5 text-white text-xs font-medium rounded transition-colors'
-          : 'inline-flex items-center px-2.5 py-1.5 text-white text-xs font-medium rounded transition-colors';
+          ? 'flex items-center justify-center px-4 py-1.5 text-white text-xs font-medium rounded transition-colors w-16'
+          : 'inline-flex items-center justify-center px-2.5 py-1.5 text-white text-xs font-medium rounded transition-colors w-16';
         switch (status) {
           case 'live':
             return `
@@ -1683,15 +1929,21 @@
             });
         }
       });
-    }
-    function startCountdowns() {
+    }    function startCountdowns() {
+      let hasCountdownExpired = false;
+      
       const updateTimers = () => {
+        let anyCountdownExpired = false;
+        
         document.querySelectorAll('[data-schedule-time]').forEach(el => {
+          if (el.classList.contains('countdown-timer')) return;
+          
           const scheduleTime = new Date(el.dataset.scheduleTime);
           const now = new Date();
           const diff = scheduleTime - now;
           if (diff <= 0) {
             el.textContent = 'Starting soon...';
+            anyCountdownExpired = true;
             return;
           }
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1704,7 +1956,49 @@
           else timeText = `${minutes}m ${seconds}s`;
           el.textContent = `Starts in: ${timeText}`;
         });
+        
+        document.querySelectorAll('.countdown-timer[data-schedule-time]').forEach(el => {
+          const scheduleTime = new Date(el.dataset.scheduleTime);
+          const now = new Date();
+          const diff = scheduleTime - now;
+          
+          if (diff <= 0) {
+            el.innerHTML = '<span class="text-green-400 animate-pulse">Starting Soon!</span>';
+            anyCountdownExpired = true;
+            return;
+          }
+          
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+          let timeHTML = '';
+          if (days > 0) {
+            timeHTML = `<span class="countdown-part">${days}<span class="countdown-label">d</span></span> 
+                       <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label">h</span></span> 
+                       <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span>`;
+          } else if (hours > 0) {
+            timeHTML = `<span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label">h</span></span> 
+                       <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span> 
+                       <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label">s</span></span>`;
+          } else {
+            timeHTML = `<span class="countdown-part text-orange-400">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span> 
+                       <span class="countdown-part text-orange-400">${seconds.toString().padStart(2, '0')}<span class="countdown-label">s</span></span>`;
+          }
+          
+          el.innerHTML = timeHTML;
+        });
+        
+        if (anyCountdownExpired && !hasCountdownExpired) {
+          hasCountdownExpired = true;
+          console.log('Countdown expired, refreshing page in 3 seconds...');
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        }
       };
+      
       updateTimers();
       setInterval(updateTimers, 1000);
     }
