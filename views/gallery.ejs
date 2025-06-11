@@ -2215,7 +2215,8 @@
           for (let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement('button');
             pageButton.className = `w-9 h-9 flex items-center justify-center rounded-lg ${i === currentPage ? 'bg-primary text-white' : 'bg-dark-700 hover:bg-dark-600 text-gray-400 hover:text-white transition-colors'}`;
-            pageButton.textContent = i;            pageButton.addEventListener('click', () => {
+            pageButton.textContent = i;            
+            pageButton.addEventListener('click', () => {
               if (i !== currentPage) {
                 currentPage = i;
                 filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), currentSort, currentPage);
@@ -2361,7 +2362,7 @@
                   card.classList.add('animate-fade-out');
                   setTimeout(() => card.remove(), 300);
                 }
-              });
+              });              
               setTimeout(() => {
                 const grid = document.querySelector('.grid');
                 if (grid) {
@@ -2375,6 +2376,13 @@
                 }
                 const countSpan = document.querySelector('h2 span.text-gray-400');
                 if (countSpan) countSpan.textContent = '';
+                
+                const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
+                if (paginationContainer) {
+                  paginationContainer.style.display = 'none';
+                }
+                
+                if (window.allVideosData) window.allVideosData = [];
               }, 350);
               showToast('success', 'All videos deleted successfully');
             } catch (e) {
