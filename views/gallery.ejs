@@ -31,23 +31,17 @@
           <span>Clear</span>
         </button>
       </div>
-    </div>
-
+    </div>    
     <div class="bg-gray-800 rounded-lg p-4 mb-6">
-      <div class="flex flex-row items-center gap-3">
-
-        <div class="relative w-full sm:w-80 md:w-96">
+      <div class="flex flex-row items-center justify-between gap-4">
+        <div class="relative flex-1 max-w-md">
           <input type="text" placeholder="Search videos..."
             class="w-full bg-dark-700 text-white pl-9 pr-4 py-2.5 border border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
           <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>        
-        <div class="w-40 sm:w-32">
-          <select
-            class="w-full bg-dark-700 border border-gray-600 text-white px-3 py-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
-            <option selected>Newest</option>
-            <option>Oldest</option>
-          </select>
         </div>
+        <button id="sort-toggle-btn" class="w-12 h-11 flex items-center justify-center bg-dark-700 border border-gray-600 hover:bg-dark-600 text-white rounded-lg focus:outline-none focus:ring-1 focus:ring-primary transition-colors" title="Sort: Newest">
+          <i id="sort-icon" class="ti ti-sort-descending text-lg"></i>
+        </button>
       </div>
     </div>
 
@@ -2106,10 +2100,11 @@
             console.error('Error monitoring import progress:', error);
           }
         }, 1000);
-      }
-      document.addEventListener('DOMContentLoaded', function () {
+      }      
+      document.addEventListener('DOMContentLoaded', function () {        
         const searchInput = document.querySelector('input[placeholder="Search videos..."]');
-        const sortSelect = document.querySelector('select');
+        const sortToggleBtn = document.getElementById('sort-toggle-btn');
+        const sortIcon = document.getElementById('sort-icon');
         const videoGrid = document.querySelector('.grid');
         const allVideosElements = Array.from(document.querySelectorAll('.grid > div:not(.col-span-full)'));
         const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
@@ -2118,8 +2113,21 @@
         const itemsPerPage = 8;
         let currentPage = 1;
         let totalPages = 1;
+        let currentSort = localStorage.getItem('gallery-sort') || 'Newest';
 
         if (allVideosElements.length === 0) return;        
+        
+        updateSortDisplay(currentSort);
+          function updateSortDisplay(sortOrder) {
+          if (sortOrder === 'Oldest') {
+            sortIcon.className = 'ti ti-sort-ascending text-lg';
+            sortToggleBtn.title = 'Sort: Oldest';
+          } else {
+            sortIcon.className = 'ti ti-sort-descending text-lg';
+            sortToggleBtn.title = 'Sort: Newest';
+          }
+        }
+        
         window.allVideosData = allVideosElements.map(videoEl => {
           const dateText = videoEl.querySelector('.text-xs.text-gray-400 span:first-child').textContent.trim();
           let dateObj;
@@ -2156,19 +2164,21 @@
           };
         });
 
-        const initialSortOrder = sortSelect.value;
-        filterAndDisplayVideos('', initialSortOrder, 1);
+        filterAndDisplayVideos('', currentSort, 1);
 
         searchInput.addEventListener('input', function () {
-
           const searchTerm = this.value.toLowerCase().trim();
           currentPage = 1;
-          filterAndDisplayVideos(searchTerm, sortSelect.value, currentPage);
+          filterAndDisplayVideos(searchTerm, currentSort, currentPage);
         });
 
-        sortSelect.addEventListener('change', function () {
+        sortToggleBtn.addEventListener('click', function() {
+          const newSort = currentSort === 'Newest' ? 'Oldest' : 'Newest';
+          currentSort = newSort;
+          localStorage.setItem('gallery-sort', newSort);
+          updateSortDisplay(newSort);
           currentPage = 1;
-          filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), this.value, currentPage);
+          filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), newSort, currentPage);
         });
 
         function setupPaginationControls(filteredVideos) {
@@ -2184,11 +2194,11 @@
           const prevButton = document.createElement('button');
           prevButton.className = `w-9 h-9 flex items-center justify-center rounded-lg ${currentPage === 1 ? 'bg-dark-700 text-gray-400 cursor-not-allowed' : 'bg-dark-700 hover:bg-dark-600 text-gray-400 hover:text-white transition-colors'}`;
           prevButton.innerHTML = '<i class="ti ti-chevron-left"></i>';
-          prevButton.disabled = currentPage === 1;
+          prevButton.disabled = currentPage === 1;          
           prevButton.addEventListener('click', () => {
             if (currentPage > 1) {
               currentPage--;
-              filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), sortSelect.value, currentPage);
+              filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), currentSort, currentPage);
             }
           });
           paginationButtonsContainer.appendChild(prevButton);
@@ -2205,11 +2215,10 @@
           for (let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement('button');
             pageButton.className = `w-9 h-9 flex items-center justify-center rounded-lg ${i === currentPage ? 'bg-primary text-white' : 'bg-dark-700 hover:bg-dark-600 text-gray-400 hover:text-white transition-colors'}`;
-            pageButton.textContent = i;
-            pageButton.addEventListener('click', () => {
+            pageButton.textContent = i;            pageButton.addEventListener('click', () => {
               if (i !== currentPage) {
                 currentPage = i;
-                filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), sortSelect.value, currentPage);
+                filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), currentSort, currentPage);
               }
             });
             paginationButtonsContainer.appendChild(pageButton);
@@ -2218,11 +2227,11 @@
           const nextButton = document.createElement('button');
           nextButton.className = `w-9 h-9 flex items-center justify-center rounded-lg ${currentPage === totalPages ? 'bg-dark-700 text-gray-400 cursor-not-allowed' : 'bg-dark-700 hover:bg-dark-600 text-gray-400 hover:text-white transition-colors'}`;
           nextButton.innerHTML = '<i class="ti ti-chevron-right"></i>';
-          nextButton.disabled = currentPage === totalPages;
+          nextButton.disabled = currentPage === totalPages;          
           nextButton.addEventListener('click', () => {
             if (currentPage < totalPages) {
               currentPage++;
-              filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), sortSelect.value, currentPage);
+              filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), currentSort, currentPage);
             }
           });
           paginationButtonsContainer.appendChild(nextButton);
