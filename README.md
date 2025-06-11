@@ -30,6 +30,7 @@ cd streamdev && node reset-password.js
       
 **History**
 - [ ] reuse history stream
+- [ ] responsive view
 
 **Global**
 - [ ] hapus unused code
