@@ -1,18 +1,30 @@
 <% layout('layout') -%>
 <div class="flex-1 p-3 pt-6 sm:p-4 sm:pt-8 md:p-6 md:pt-12 lg:pt-6">
-  <div class="max-w-7xl mx-auto">    
+  <div class="max-w-7xl mx-auto">      
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">      
-      <div>
-        <h1 class="text-2xl font-bold text-white">Video Analytics <span id="videoCount" class="text-gray-400 text-2xl font-normal"><% if (videos && videos.length > 0) { %>(<%= videos.length %>)<% } %></span></h1>
-        <p class="text-gray-400 mt-1">Monitor your YouTube videos with real-time analytics</p>
-      </div>      
-      <div class="flex items-center gap-2 mt-4 sm:mt-0">        
-        <button id="addVideoBtn" class="w-24 h-10 bg-primary hover:bg-secondary px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+    <div class="flex flex-col mb-6">      
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Video Analytics <span id="videoCount" class="text-gray-400 text-2xl font-normal"><% if (videos && videos.length > 0) { %>(<%= videos.length %>)<% } %></span></h1>
+          <p class="text-gray-400 mt-1">Monitor your YouTube videos with real-time analytics</p>
+        </div>      
+        <div class="hidden sm:flex items-center gap-2 mt-4 sm:mt-0">        
+          <button id="addVideoBtn" class="w-24 h-10 bg-primary hover:bg-secondary px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+            <i class="ti ti-plus"></i>
+            <span>Add</span>
+          </button>        
+          <button id="clearAllAnalyticsBtn" class="w-24 h-10 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+            <i class="ti ti-trash"></i> <span>Clear</span>
+          </button>
+        </div>
+      </div>
+      <!-- Mobile buttons - full width -->
+      <div class="flex sm:hidden gap-2 mt-4 w-full">        
+        <button id="addVideoBtnMobile" class="flex-1 h-10 bg-primary hover:bg-secondary px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
           <i class="ti ti-plus"></i>
           <span>Add</span>
         </button>        
-        <button id="clearAllAnalyticsBtn" class="w-24 h-10 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
+        <button id="clearAllAnalyticsBtnMobile" class="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2" style="display: none;">
           <i class="ti ti-trash"></i> <span>Clear</span>
         </button>
       </div>
@@ -220,15 +232,16 @@ class VideoAnalyticsManager {  constructor() {
   async init() {
     this.bindEvents();
     await this.startAutoRefresh();
-  }
+  }  
   bindEvents() {
     const addVideoBtn = document.getElementById('addVideoBtn');
+    const addVideoBtnMobile = document.getElementById('addVideoBtnMobile');
     const addFirstVideoBtn = document.getElementById('addFirstVideoBtn');
     const closeModal = document.getElementById('closeModal');
     const cancelBtn = document.getElementById('cancelBtn');
     const addVideoForm = document.getElementById('addVideoForm');
 
-    [addVideoBtn, addFirstVideoBtn].forEach(btn => {
+    [addVideoBtn, addVideoBtnMobile, addFirstVideoBtn].forEach(btn => {
       btn?.addEventListener('click', () => this.showAddVideoModal());
     });
 
@@ -265,15 +278,23 @@ class VideoAnalyticsManager {  constructor() {
     document.getElementById('addVideoForm')?.reset();
     this.hideError();
     this.resetSubmitButton();
-  }
+  }  
   updateClearButtonVisibility() {
     const clearBtn = document.getElementById('clearAllAnalyticsBtn');
-    if (clearBtn) {
-      if (this.videos.size > 0) {
-        clearBtn.style.display = 'flex';
-      } else {
-        clearBtn.style.display = 'none';
-      }
+    const clearBtnMobile = document.getElementById('clearAllAnalyticsBtnMobile');
+    const addBtn = document.getElementById('addVideoBtn');
+    const addBtnMobile = document.getElementById('addVideoBtnMobile');
+    
+    if (this.videos.size > 0) {
+      if (clearBtn) clearBtn.style.display = 'flex';
+      if (clearBtnMobile) clearBtnMobile.style.display = 'flex';
+      if (addBtn) addBtn.style.display = 'flex';
+      if (addBtnMobile) addBtnMobile.style.display = 'flex';
+    } else {
+      if (clearBtn) clearBtn.style.display = 'none';
+      if (clearBtnMobile) clearBtnMobile.style.display = 'none';
+      if (addBtn) addBtn.style.display = 'none';
+      if (addBtnMobile) addBtnMobile.style.display = 'none';
     }
     this.updateVideoCount();
   }
@@ -901,7 +922,8 @@ function showToast(type, message) {
 
 document.addEventListener('DOMContentLoaded', () => {
   window.analyticsManagerInstance = new VideoAnalyticsManager();
-  document.getElementById('clearAllAnalyticsBtn').addEventListener('click', async function() {
+  
+  function handleClearAllClick() {
     const manager = window.analyticsManagerInstance;
     if (!manager || manager.videos.size === 0) {
       showToast('info', 'No videos to clear');
@@ -921,9 +943,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) {
           modal.remove();
         }
+        
         const btn = document.getElementById('clearAllAnalyticsBtn');
-        btn.disabled = true;
-        btn.classList.add('opacity-60', 'pointer-events-none');        try {
+        const btnMobile = document.getElementById('clearAllAnalyticsBtnMobile');
+        
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.add('opacity-60', 'pointer-events-none');
+        }
+        if (btnMobile) {
+          btnMobile.disabled = true;
+          btnMobile.classList.add('opacity-60', 'pointer-events-none');
+        }
+        
+        try {
           await Promise.all(ids.map(id => fetch(`/api/analytics/video/${id}`, { method: 'DELETE' }))); 
           manager.videos.clear();
           manager.updateDisplay();
@@ -932,12 +965,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
           showToast('error', 'Failed to remove all analytics videos');
         } finally {
-          btn.disabled = false;
-          btn.classList.remove('opacity-60', 'pointer-events-none');
+          if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-60', 'pointer-events-none');
+          }
+          if (btnMobile) {
+            btnMobile.disabled = false;
+            btnMobile.classList.remove('opacity-60', 'pointer-events-none');
+          }
         }
       }
     });
-  });
+  }
+  
+  document.getElementById('clearAllAnalyticsBtn')?.addEventListener('click', handleClearAllClick);
+  document.getElementById('clearAllAnalyticsBtnMobile')?.addEventListener('click', handleClearAllClick);
 });
 </script>
 

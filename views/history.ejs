@@ -73,11 +73,24 @@
                       <%= entry.title %>
                     </div>
                   </div>
-                </td>
+                </td>                
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <i
-                      class="ti ti-<%= helpers.getPlatformIcon(entry.platform) %> text-<%= helpers.getPlatformColor(entry.platform) %> mr-1.5"></i>
+                    <i class="ti ti-<%= 
+                      entry.platform === 'YouTube' ? 'brand-youtube' :
+                      entry.platform === 'Facebook' ? 'brand-facebook' :
+                      entry.platform === 'Twitch' ? 'brand-twitch' :
+                      entry.platform === 'TikTok' ? 'brand-tiktok' :
+                      entry.platform === 'Shopee Live' ? 'shopping-bag' :
+                      'broadcast'
+                    %> <%= 
+                      entry.platform === 'YouTube' ? 'text-red-500' :
+                      entry.platform === 'Facebook' ? 'text-blue-500' :
+                      entry.platform === 'Twitch' ? 'text-purple-500' :
+                      entry.platform === 'TikTok' ? 'text-gray-100' :
+                      entry.platform === 'Shopee Live' ? 'text-orange-500' :
+                      'text-gray-400'
+                    %> mr-1.5 text-base"></i>
                     <span class="text-sm">
                       <%= entry.platform || 'Custom' %>
                     </span>

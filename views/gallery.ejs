@@ -2,10 +2,15 @@
   <% function formatFileSize(bytes) { if (bytes < 1024) return bytes + ' B' ; else if (bytes < 1048576) return (bytes /
     1024).toFixed(1) + ' KB' ; else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB' ; else return
     (bytes / 1073741824).toFixed(1) + ' GB' ; } function formatDate(dateString) { const date=new Date(dateString); const
-    options={ day: 'numeric' , month: 'short' , year: 'numeric' }; return date.toLocaleDateString('en-US', options); }
+    options={ day: 'numeric' , month: 'short' , year: 'numeric' }; return date.toLocaleDateString('en-US', options) + ', ' + date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }); }
     function formatDuration(seconds) { if (!seconds) return '00:00' ; const minutes=Math.floor(seconds / 60); const
     remainingSeconds=Math.floor(seconds % 60); return `${minutes.toString().padStart(2, '0'
-    )}:${remainingSeconds.toString().padStart(2, '0' )}`; } %>    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    )}:${remainingSeconds.toString().padStart(2, '0' )}`; } %>    
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
       <div>
         <h2 class="text-2xl font-bold">Video Gallery<% if (videos && videos.length > 0) { %> <span class="text-gray-400 font-normal">(<%= videos.length %>)</span><% } %></h2>
         <p class="text-gray-400 text-sm mt-1">Manage your videos for streaming</p>
@@ -20,7 +25,8 @@
           class="flex-1 flex items-center justify-center gap-2 bg-[#4285F4]/20 border border-[#4285F4]/50 hover:bg-[#4285F4]/30 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium">
           <i class="ti ti-brand-google-drive text-[#4285F4]"></i>
           <span>Import</span>
-        </button>        <button id="clear-all-videos" class="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium<% if (!videos || videos.length === 0) { %> hidden<% } %>">
+        </button>        
+        <button id="clear-all-videos" class="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium<% if (!videos || videos.length === 0) { %> hidden<% } %>">
           <i class="ti ti-trash"></i>
           <span>Clear</span>
         </button>
@@ -75,9 +81,9 @@
                 <%= video.title %>
               </h3>
               <div class="flex items-center justify-between">
-                <div class="text-xs text-gray-400 flex items-center">
+                <div class="text-xs text-gray-400 flex items-center">                  
                   <span>
-                    <%= new Date(video.upload_date).toLocaleDateString() %>
+                    <%= formatDate(video.upload_date) %>
                   </span>
                   <span class="mx-1">•</span>
                   <span>
@@ -287,7 +293,7 @@
           return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
-      }
+      }      
       function formatDate(dateString) {
         if (!dateString) return 'Unknown date';
         const date = new Date(dateString);
@@ -295,6 +301,10 @@
           year: 'numeric',
           month: 'short',
           day: 'numeric'
+        }) + ', ' + date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
         });
       }
       function formatFileSize(bytes) {
@@ -756,65 +766,712 @@
         videoPlayer.pause();
         document.getElementById('videoPreviewModal').classList.add('hidden');
         document.body.style.overflow = 'auto';
-      }
-
+      }      
       function playVideo(videoId, videoTitle) {
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm transition-all duration-300';
         modal.id = 'video-player-modal';
+        
         modal.innerHTML = `
-        <div class="relative w-full max-w-4xl mx-auto">
-          <div class="bg-dark-800 rounded-lg overflow-hidden shadow-xl">
+        <!-- Modal Backdrop -->
+        <div class="absolute inset-0 bg-black/80"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full h-auto md:max-w-7xl mx-auto p-2 md:p-4 transform transition-all duration-300 opacity-0 scale-95 z-10 max-w-4xl" id="player-container">
+          <div class="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-xl rounded-lg md:rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50 h-auto flex flex-col max-h-[90vh]">
             
-            <div class="flex items-center justify-between p-4 border-b border-gray-600">
-              <div class="flex items-center">
-                <h3 class="text-lg font-medium">${videoTitle || 'Now Playing'}</h3>
+            <!-- Enhanced Mobile-First Header -->
+            <div class="flex items-center justify-between p-3 md:p-6 bg-gradient-to-r from-dark-800/80 to-dark-700/80 border-b border-gray-600/30 flex-shrink-0">
+              <div class="flex items-center min-w-0 flex-1">
+                <div class="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-primary/20 to-blue-600/20 flex items-center justify-center mr-2 md:mr-4 flex-shrink-0">
+                  <i class="ti ti-player-play text-primary text-sm md:text-xl"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-sm md:text-xl font-semibold text-white truncate mb-0 md:mb-1 leading-tight">${videoTitle || 'Now Playing'}</h3>                  
+                  <div class="hidden md:flex items-center gap-4 text-sm text-gray-400">
+                    <span class="flex items-center gap-1">
+                      <i class="ti ti-clock-hour-3 text-xs"></i>
+                      <span id="video-duration">--:--</span>
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <i class="ti ti-device-tv text-xs"></i>
+                      <span id="video-resolution">Loading...</span>
+                    </span>
+                  </div>                  
+                  <!-- Mobile Stats Row -->
+                  <div class="flex md:hidden items-center gap-3 text-xs text-gray-400 mt-1">
+                    <span id="video-duration-mobile">--:--</span>
+                    <span class="text-gray-600">•</span>
+                    <span id="video-resolution-mobile">Loading...</span>
+                    <span class="text-gray-600">•</span>
+                    <span id="video-fps-mobile">30fps</span>
+                    <span class="text-gray-600">•</span>
+                    <span>MP4</span>
+                  </div>
+                </div>
+              </div>              
+              <div class="flex items-center gap-1 md:gap-3 ml-2 md:ml-4">
+                <button id="fullscreen-btn" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200" title="Fullscreen">
+                  <i class="ti ti-maximize text-sm md:text-lg"></i>
+                </button>
+                <button id="close-player-btn" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-500/20 hover:text-red-400 transition-all duration-200" title="Close">
+                  <i class="ti ti-x text-sm md:text-lg"></i>
+                </button>
               </div>
-              <button id="close-player-btn" class="rounded-full w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
-                <i class="ti ti-x"></i>
-              </button>
             </div>
-            
-            <div class="bg-dark-700 flex justify-center" style="height: 53vh; max-height: 600px;">
-              <video 
-                id="native-player"
-                class="h-full max-h-full max-w-full object-contain"
-                controls 
-                preload="auto"
-                autoplay
-              >
-                <source src="/stream/${videoId}" type="video/mp4">
-                Your browser does not support HTML5 video.
-              </video>
+              <!-- Responsive Video Container -->
+            <div class="relative bg-black flex-1 md:flex-none video-container-mobile md:video-container-desktop" style="min-height: 200px;">
+              <!-- Mobile: Centered aspect ratio container, Desktop: Aspect ratio -->
+              <div class="absolute inset-0 md:relative md:inset-auto" style="aspect-ratio: 16/9; min-height: 200px;">
+                <video 
+                  id="native-player"
+                  class="w-full h-full object-contain"
+                  preload="auto"
+                  autoplay
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                  playsinline
+                  webkit-playsinline
+                >
+                  <source src="/stream/${videoId}" type="video/mp4">
+                  Your browser does not support HTML5 video.
+                </video>
+              </div>
+              
+              <!-- Beautiful Loading Overlay -->
+              <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/90 to-gray-900/90 backdrop-blur-sm">
+                <div class="text-center px-4">
+                  <div class="relative w-16 md:w-20 h-16 md:h-20 mx-auto mb-4 md:mb-6">
+                    <div class="absolute inset-0 border-3 md:border-4 border-primary/30 rounded-full"></div>
+                    <div class="absolute inset-0 border-3 md:border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+                    <div class="absolute inset-2 flex items-center justify-center">
+                      <i class="ti ti-player-play text-primary text-lg md:text-xl"></i>
+                    </div>
+                  </div>
+                  <h4 class="text-white text-lg md:text-xl font-semibold mb-2">Loading Video</h4>
+                  <p class="text-gray-300 text-sm mb-4">Preparing your content...</p>
+                  <div class="flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Error State -->
+              <div id="error-overlay" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/90 to-red-900/20 backdrop-blur-sm hidden">
+                <div class="text-center max-w-md mx-auto p-4 md:p-6">
+                  <div class="w-16 md:w-20 h-16 md:h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4 md:mb-6 mx-auto">
+                    <i class="ti ti-alert-triangle text-red-400 text-2xl md:text-3xl"></i>
+                  </div>
+                  <h4 class="text-white text-lg md:text-xl font-semibold mb-2">Failed to Load Video</h4>
+                  <p class="text-gray-300 text-sm mb-4">There was an error loading this video. Please try again later.</p>
+                  <button id="retry-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 md:px-6 py-2 rounded-lg transition-colors font-medium text-sm md:text-base">
+                    <i class="ti ti-refresh mr-2"></i>
+                    Retry
+                  </button>
+                </div>
+              </div>
+                <!-- Mobile Controls Overlay -->
+              <div id="mobile-controls" class="md:hidden absolute inset-0 pointer-events-none">
+                <div class="absolute bottom-4 left-4 right-4 pointer-events-auto">
+                  <div class="bg-black/70 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <button id="mobile-play-pause" class="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-primary">
+                        <i class="ti ti-player-pause text-lg"></i>
+                      </button>
+                      <div class="text-white text-sm">
+                        <div class="font-medium truncate max-w-32" id="mobile-title">${videoTitle || 'Now Playing'}</div>
+                        <div class="text-xs text-gray-300" id="mobile-time">00:00 / 00:00</div>
+                      </div>
+                    </div>                    
+                    <div class="flex items-center gap-2">
+                      <button id="mobile-volume" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-white">
+                        <i class="ti ti-volume text-sm"></i>
+                      </button>
+                      <div class="mobile-volume-slider relative w-12 h-6 flex items-center cursor-pointer" id="mobile-volume-container">                        
+                        <div class="w-full h-1 bg-white/30 rounded-full relative" id="mobile-volume-bar">
+                          <div class="h-full bg-primary rounded-full transition-all duration-100 ease-out" id="mobile-volume-fill" style="width: 100%"></div>
+                          <div class="absolute w-2 h-2 bg-white rounded-full shadow-sm top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-100 ease-out" id="mobile-volume-thumb" style="left: 100%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <!-- Desktop Controls Overlay -->
+              <div id="desktop-controls" class="hidden md:block absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="absolute bottom-4 left-4 right-4 pointer-events-auto">
+                  <div class="bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-lg p-4">
+                    <!-- Progress Bar -->
+                    <div class="mb-3">                      
+                      <div class="relative h-1 bg-white/30 rounded-full cursor-pointer group" id="progress-bar">
+                        <div class="absolute h-full bg-primary rounded-full transition-all duration-100 ease-out" id="progress-fill" style="width: 0%"></div>
+                        <div class="absolute w-2 h-2 bg-primary rounded-full shadow-sm top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-100 ease-out opacity-0 group-hover:opacity-100" id="progress-thumb" style="left: 0%"></div>
+                      </div>
+                    </div>
+                    
+                    <!-- Control Buttons -->
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <button id="desktop-play-pause" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all duration-200">
+                          <i class="ti ti-player-pause text-lg"></i>
+                        </button>
+                          <div class="flex items-center gap-2">                          
+                            <button id="desktop-volume-btn" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-white transition-colors">
+                            <i class="ti ti-volume text-sm"></i>
+                          </button>                          
+                          <div class="volume-slider-container relative w-12 h-6 flex items-center cursor-pointer" id="volume-container">                            
+                            <div class="w-full h-1 bg-white/30 rounded-full relative" id="volume-bar">
+                              <div class="h-full bg-primary rounded-full transition-all duration-100 ease-out" id="volume-fill" style="width: 100%"></div>
+                              <div class="absolute w-2 h-2 bg-white rounded-full shadow-sm top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-100 ease-out" id="volume-thumb" style="left: 100%"></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="text-white text-sm" id="desktop-time">
+                          <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
+                        </div>                      
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>            
+            <!-- Enhanced Footer with Stats - Hidden on Mobile -->
+            <div class="hidden md:block px-6 py-4 bg-gradient-to-r from-dark-800/60 to-dark-700/60 border-t border-gray-600/30 flex-shrink-0">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6 text-sm">
+                  <div class="flex items-center gap-2 text-gray-300">
+                    <i class="ti ti-device-desktop text-primary text-sm"></i>
+                    <span id="video-fps">30fps</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-gray-300">
+                    <i class="ti ti-file-type-video text-primary text-sm"></i>
+                    <span>MP4</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      `;
-        document.body.appendChild(modal);
+      `;        
+      document.body.appendChild(modal);
         document.body.classList.add('overflow-hidden');
-        document.getElementById('close-player-btn').addEventListener('click', function () {
-          const videoElement = document.getElementById('native-player');
-          if (videoElement) videoElement.pause();
-          document.getElementById('video-player-modal').remove();
-          document.body.classList.remove('overflow-hidden');
+        
+        setTimeout(() => {
+          const container = document.getElementById('player-container');
+          container.classList.remove('opacity-0', 'scale-95');
+          container.classList.add('opacity-100', 'scale-100');
+        }, 50);
+          const video = document.getElementById('native-player');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const errorOverlay = document.getElementById('error-overlay');
+        const durationSpan = document.getElementById('video-duration');
+        const durationSpanMobile = document.getElementById('video-duration-mobile');        
+        const resolutionSpan = document.getElementById('video-resolution');
+        const resolutionSpanMobile = document.getElementById('video-resolution-mobile');
+        const fpsSpan = document.getElementById('video-fps');
+        const fpsSpanMobile = document.getElementById('video-fps-mobile');        
+        const mobileControls = document.getElementById('mobile-controls');
+        const mobilePlayPause = document.getElementById('mobile-play-pause');
+        const mobileTime = document.getElementById('mobile-time');
+        const mobileVolume = document.getElementById('mobile-volume');
+        const mobileVolumeContainer = document.getElementById('mobile-volume-container');
+        const mobileVolumeBar = document.getElementById('mobile-volume-bar');
+        const mobileVolumeFill = document.getElementById('mobile-volume-fill');
+        const mobileVolumeThumb = document.getElementById('mobile-volume-thumb');
+          
+        const desktopControls = document.getElementById('desktop-controls');
+        const desktopPlayPause = document.getElementById('desktop-play-pause');
+        const desktopVolumeBtn = document.getElementById('desktop-volume-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const progressThumb = document.getElementById('progress-thumb');
+        const volumeBar = document.getElementById('volume-bar');
+        const volumeFill = document.getElementById('volume-fill');
+        const volumeThumb = document.getElementById('volume-thumb');
+        const currentTimeSpan = document.getElementById('current-time');
+        const totalTimeSpan = document.getElementById('total-time');
+          let controlsTimeout;
+        let isMobile = window.innerWidth < 768;
+        
+        function showMobileControls() {
+          if (!isMobile) return;
+          mobileControls.style.opacity = '1';
+          clearTimeout(controlsTimeout);
+          controlsTimeout = setTimeout(() => {
+            if (!video.paused) {
+              mobileControls.style.opacity = '0';
+            }
+          }, 3000);
+        }
+        
+        function showDesktopControls() {
+          if (isMobile) return;
+          desktopControls.style.opacity = '1';
+          clearTimeout(controlsTimeout);
+          controlsTimeout = setTimeout(() => {
+            if (!video.paused) {
+              desktopControls.style.opacity = '0';
+            }
+          }, 3000);
+        }
+        
+        function formatTime(seconds) {
+          const minutes = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60);
+          return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+        if (isMobile) {
+          video.addEventListener('touchstart', showMobileControls);
+          video.addEventListener('click', showMobileControls);
+          mobileControls.style.transition = 'opacity 0.3s ease';
+          showMobileControls();
+        } else {
+          video.addEventListener('mousemove', showDesktopControls);
+          video.addEventListener('click', showDesktopControls);
+          desktopControls.addEventListener('mouseenter', () => {
+            clearTimeout(controlsTimeout);
+            desktopControls.style.opacity = '1';
+          });
+          desktopControls.addEventListener('mouseleave', () => {
+            if (!video.paused) {
+              controlsTimeout = setTimeout(() => {
+                desktopControls.style.opacity = '0';
+              }, 1000);
+            }
+          });
+          showDesktopControls();
+        }
+        
+        mobilePlayPause.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (video.paused) {
+            video.play();
+            mobilePlayPause.innerHTML = '<i class="ti ti-player-pause text-lg"></i>';
+          } else {
+            video.pause();
+            mobilePlayPause.innerHTML = '<i class="ti ti-player-play text-lg"></i>';
+          }
+          showMobileControls();
+        });        
+        mobileVolume.addEventListener('click', (e) => {
+          e.stopPropagation();
+          video.muted = !video.muted;
+          updateMobileVolumeDisplay();
+          showMobileControls();
         });
+
+        let isMobileDraggingVolume = false;
+        
+        function updateMobileVolumeFromEvent(e) {
+          const rect = mobileVolumeBar.getBoundingClientRect();
+          const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          video.volume = percent;
+          if (percent > 0) video.muted = false;
+          updateMobileVolumeDisplay();
+          showMobileControls();
+        }
+        
+        mobileVolumeContainer.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          isMobileDraggingVolume = true;
+          const touch = e.touches[0];
+          updateMobileVolumeFromEvent(touch);
+        });
+        
+        mobileVolumeContainer.addEventListener('touchmove', (e) => {
+          if (isMobileDraggingVolume) {
+            e.preventDefault();
+            e.stopPropagation();
+            const touch = e.touches[0];
+            updateMobileVolumeFromEvent(touch);
+          }
+        });
+        
+        mobileVolumeContainer.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          isMobileDraggingVolume = false;
+        });
+          mobileVolumeContainer.addEventListener('click', (e) => {
+          e.stopPropagation();
+          updateMobileVolumeFromEvent(e);
+        });
+
+        function updateMobileVolumeDisplay() {
+          const volumePercent = video.muted ? 0 : video.volume * 100;
+          mobileVolumeFill.style.width = volumePercent + '%';
+          
+          if (mobileVolumeThumb) {
+            mobileVolumeThumb.style.left = volumePercent + '%';
+          }
+          
+          if (video.muted || video.volume === 0) {
+            mobileVolume.innerHTML = '<i class="ti ti-volume-off text-sm"></i>';
+          } else {
+            mobileVolume.innerHTML = '<i class="ti ti-volume text-sm"></i>';
+          }
+        }
+
+        if (!isMobile) {
+          desktopPlayPause.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (video.paused) {
+              video.play();
+              desktopPlayPause.innerHTML = '<i class="ti ti-player-pause text-lg"></i>';
+            } else {
+              video.pause();
+              desktopPlayPause.innerHTML = '<i class="ti ti-player-play text-lg"></i>';
+            }
+            showDesktopControls();
+          });
+          
+          desktopVolumeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            video.muted = !video.muted;
+            updateVolumeDisplay();
+            showDesktopControls();
+          });
+          
+          progressBar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+            showDesktopControls();
+          });
+          let isDraggingVolume = false;
+          const volumeContainer = document.getElementById('volume-container');
+          
+          function updateVolumeFromEvent(e) {
+            const rect = volumeBar.getBoundingClientRect();
+            const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            video.volume = percent;
+            if (percent > 0) video.muted = false;
+            updateVolumeDisplay();
+            showDesktopControls();
+          }
+          
+          volumeContainer.addEventListener('mouseenter', () => {
+            volumeTooltip.style.opacity = '1';
+          });
+          
+          volumeContainer.addEventListener('mouseleave', () => {
+            if (!isDraggingVolume) {
+              volumeTooltip.style.opacity = '0';
+            }
+          });
+          
+          volumeContainer.addEventListener('mousemove', (e) => {
+            if (isDraggingVolume) {
+              updateVolumeFromEvent(e);
+            }
+          });
+          
+          volumeContainer.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isDraggingVolume = true;
+            updateVolumeFromEvent(e);
+            volumeContainer.style.cursor = 'grabbing';
+          });
+          
+          document.addEventListener('mousemove', (e) => {
+            if (isDraggingVolume) {
+              updateVolumeFromEvent(e);
+            }
+          });
+          
+          document.addEventListener('mouseup', () => {
+            if (isDraggingVolume) {
+              isDraggingVolume = false;
+              volumeContainer.style.cursor = 'pointer';
+              volumeTooltip.style.opacity = '0';
+            }
+          });
+          volumeBar.addEventListener('click', (e) => {
+            if (!isDraggingVolume) {
+              e.stopPropagation();
+              updateVolumeFromEvent(e);
+            }
+          });
+          
+          volumeContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            video.volume = Math.max(0, Math.min(1, video.volume + delta));
+            if (video.volume > 0) video.muted = false;
+            updateVolumeDisplay();
+            showDesktopControls();
+          });
+        }
+        function updateVolumeDisplay() {
+          if (!isMobile) {
+            const volumePercent = video.muted ? 0 : video.volume * 100;
+            volumeFill.style.width = volumePercent + '%';
+            
+            if (volumeThumb) {
+              volumeThumb.style.left = volumePercent + '%';
+            }
+          }
+        }
+        
+        function updateMobileVolumeDisplay() {
+          const volumePercent = video.muted ? 0 : video.volume * 100;
+          mobileVolumeFill.style.width = volumePercent + '%';
+          
+          if (mobileVolumeThumb) {
+            mobileVolumeThumb.style.left = volumePercent + '%';
+          }
+          
+          if (video.muted || video.volume === 0) {
+            mobileVolume.innerHTML = '<i class="ti ti-volume-off text-sm"></i>';
+          } else {
+            mobileVolume.innerHTML = '<i class="ti ti-volume text-sm"></i>';
+          }
+        }
+
+        video.addEventListener('loadstart', () => {
+          loadingOverlay.classList.remove('hidden');
+          errorOverlay.classList.add('hidden');
+        });
+        
+        video.addEventListener('canplay', () => {
+          loadingOverlay.classList.add('hidden');
+        });
+          video.addEventListener('loadedmetadata', () => {
+          const duration = video.duration;
+          if (duration && !isNaN(duration)) {
+            const hours = Math.floor(duration / 3600);
+            const minutes = Math.floor((duration % 3600) / 60);
+            const seconds = Math.floor(duration % 60);
+            
+            let formattedDuration;
+            if (hours > 0) {
+              formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+              formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            if (durationSpan) durationSpan.textContent = formattedDuration;
+            if (durationSpanMobile) durationSpanMobile.textContent = formattedDuration;
+            if (totalTimeSpan) totalTimeSpan.textContent = formatTime(duration);
+          }
+          
+          if (video.videoWidth && video.videoHeight) {
+            const quality = video.videoHeight >= 1080 ? 'FHD' : video.videoHeight >= 720 ? 'HD' : 'SD';
+            const resolutionText = isMobile ? quality : `${video.videoWidth}x${video.videoHeight} (${quality})`;
+            if (resolutionSpan) resolutionSpan.textContent = resolutionText;
+            if (resolutionSpanMobile) resolutionSpanMobile.textContent = quality;
+          } else {
+            if (resolutionSpan) resolutionSpan.textContent = 'Standard';
+            if (resolutionSpanMobile) resolutionSpanMobile.textContent = 'SD';
+          }
+          
+          updateVolumeDisplay();
+        });
+          video.addEventListener('timeupdate', () => {
+          const current = video.currentTime;
+          const duration = video.duration;
+          
+          if (isMobile && mobileTime) {
+            const formatTime = (time) => {
+              const minutes = Math.floor(time / 60);
+              const seconds = Math.floor(time % 60);
+              return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            };
+            
+            if (duration && !isNaN(duration)) {
+              mobileTime.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+            }
+          } else if (!isMobile) {
+            if (currentTimeSpan) currentTimeSpan.textContent = formatTime(current);
+            
+            if (duration && !isNaN(duration)) {
+              const progressPercent = (current / duration) * 100;
+              progressFill.style.width = progressPercent + '%';
+              progressThumb.style.left = progressPercent + '%';
+            }
+          }
+        });
+          video.addEventListener('play', () => {
+          if (mobilePlayPause) {
+            mobilePlayPause.innerHTML = '<i class="ti ti-player-pause text-lg"></i>';
+          }
+          if (!isMobile && desktopPlayPause) {
+            desktopPlayPause.innerHTML = '<i class="ti ti-player-pause text-lg"></i>';
+          }
+        });
+        
+        video.addEventListener('pause', () => {
+          if (mobilePlayPause) {
+            mobilePlayPause.innerHTML = '<i class="ti ti-player-play text-lg"></i>';
+          }
+          if (!isMobile && desktopPlayPause) {
+            desktopPlayPause.innerHTML = '<i class="ti ti-player-play text-lg"></i>';
+            desktopControls.style.opacity = '1';
+          }
+          if (isMobile) {
+            mobileControls.style.opacity = '1';
+          }
+        });
+          video.addEventListener('volumechange', () => {
+          if (mobileVolume) {
+            mobileVolume.innerHTML = video.muted ? 
+              '<i class="ti ti-volume-off text-sm"></i>' : 
+              '<i class="ti ti-volume text-sm"></i>';
+          }
+          updateVolumeDisplay();
+        });
+          video.addEventListener('error', () => {
+          loadingOverlay.classList.add('hidden');
+          errorOverlay.classList.remove('hidden');
+        });
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          
+          switch(e.key) {
+            case ' ':
+              e.preventDefault();
+              if (video.paused) {
+                video.play();
+              } else {
+                video.pause();
+              }
+              break;
+            case 'ArrowUp':
+              e.preventDefault();
+              video.volume = Math.min(1, video.volume + 0.1);
+              video.muted = false;
+              updateVolumeDisplay();
+              showDesktopControls();
+              break;
+            case 'ArrowDown':
+              e.preventDefault();
+              video.volume = Math.max(0, video.volume - 0.1);
+              updateVolumeDisplay();
+              showDesktopControls();
+              break;
+            case 'ArrowLeft':
+              e.preventDefault();
+              video.currentTime = Math.max(0, video.currentTime - 10);
+              showDesktopControls();
+              break;
+            case 'ArrowRight':
+              e.preventDefault();
+              video.currentTime = Math.min(video.duration, video.currentTime + 10);
+              showDesktopControls();
+              break;
+            case 'm':
+            case 'M':
+              e.preventDefault();
+              video.muted = !video.muted;
+              updateVolumeDisplay();
+              showDesktopControls();
+              break;
+            case 'f':
+            case 'F':
+              e.preventDefault();
+              if (document.fullscreenElement) {
+                document.exitFullscreen();
+              } else if (video.requestFullscreen) {
+                video.requestFullscreen();
+              }
+              break;
+          }
+        });
+        
+        document.getElementById('retry-btn').addEventListener('click', () => {
+          errorOverlay.classList.add('hidden');
+          loadingOverlay.classList.remove('hidden');
+          video.load();
+        });
+        document.getElementById('close-player-btn').addEventListener('click', function () {
+          closePlayer();
+        });
+        
+        document.getElementById('fullscreen-btn').addEventListener('click', function () {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else if (video.requestFullscreen) {
+            video.requestFullscreen();
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          } else if (video.msRequestFullscreen) {
+            video.msRequestFullscreen();
+          } else {
+            showToast('error', 'Fullscreen not supported');
+          }
+        });
+        window.addEventListener('resize', () => {
+          const newIsMobile = window.innerWidth < 768;
+          if (newIsMobile !== isMobile) {
+            isMobile = newIsMobile;
+            if (isMobile) {
+              desktopControls.style.opacity = '0';
+              showMobileControls();
+            } else {
+              mobileControls.style.opacity = '0';
+              showDesktopControls();
+            }
+          }
+        });
+        
         document.addEventListener('keydown', function escapeHandler(e) {
           if (e.key === 'Escape') {
-            const videoElement = document.getElementById('native-player');
-            if (videoElement) videoElement.pause();
-            document.getElementById('video-player-modal').remove();
-            document.body.classList.remove('overflow-hidden');
+            closePlayer();
             document.removeEventListener('keydown', escapeHandler);
+          } else if (!isMobile) {
+            if (e.key === ' ' || e.key === 'Spacebar') {
+              e.preventDefault();
+              if (video.paused) {
+                video.play();
+              } else {
+                video.pause();
+              }            
+            } else if (e.key === 'f' || e.key === 'F') {
+              e.preventDefault();
+              document.getElementById('fullscreen-btn').click();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              video.volume = Math.min(1, video.volume + 0.1);
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              video.volume = Math.max(0, video.volume - 0.1);
+            } else if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              video.currentTime = Math.max(0, video.currentTime - 10);
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            } else if (e.key === 'm' || e.key === 'M') {
+              e.preventDefault();
+              video.muted = !video.muted;
+            }
           }
         });
         modal.addEventListener('click', function (e) {
-          if (e.target === modal) {
-            const videoElement = document.getElementById('native-player');
-            if (videoElement) videoElement.pause();
-            document.getElementById('video-player-modal').remove();
-            document.body.classList.remove('overflow-hidden');
+          if (e.target === modal || e.target.classList.contains('bg-black/80')) {
+            closePlayer();
           }
         });
+        
+        function closePlayer() {
+          const container = document.getElementById('player-container');
+          container.classList.remove('opacity-100', 'scale-100');
+          container.classList.add('opacity-0', 'scale-95');
+          
+          setTimeout(() => {
+            if (video) video.pause();
+            modal.remove();
+            document.body.classList.remove('overflow-hidden');
+          }, 200);
+        }
       }
 
       function deleteVideo(videoId, videoTitle) {
@@ -1462,30 +2119,28 @@
         let currentPage = 1;
         let totalPages = 1;
 
-        if (allVideosElements.length === 0) return;
-
+        if (allVideosElements.length === 0) return;        
         window.allVideosData = allVideosElements.map(videoEl => {
           const dateText = videoEl.querySelector('.text-xs.text-gray-400 span:first-child').textContent.trim();
           let dateObj;
           try {
-            const parts = dateText.split(/[\/,\s-]/);
-            if (parts.length === 3) {
-              const day = parseInt(parts[0], 10);
-              const month = parseInt(parts[1], 10);
-              const year = parseInt(parts[2], 10);
-
-              if (!isNaN(day) && !isNaN(month) && !isNaN(year) &&
-                year >= 1000 && year <= 9999 &&
-                month >= 1 && month <= 12 &&
-                day >= 1 && day <= 31) {
-                dateObj = new Date(year, month - 1, day);
-              } else {
-                dateObj = new Date(0);
+            dateObj = new Date(dateText);
+            
+            if (!dateObj || isNaN(dateObj.getTime())) {
+              const match = dateText.match(/(\w{3})\s+(\d{1,2}),\s+(\d{4}),\s+(\d{1,2}):(\d{2})/);
+              if (match) {
+                const [, monthStr, day, year, hour, minute] = match;
+                const monthMap = {
+                  'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                  'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                };
+                const monthNum = monthMap[monthStr];
+                if (monthNum !== undefined) {
+                  dateObj = new Date(parseInt(year), monthNum, parseInt(day), parseInt(hour), parseInt(minute));
+                }
               }
-            } else {
-              dateObj = new Date(0);
             }
-
+            
             if (!dateObj || isNaN(dateObj.getTime())) {
               dateObj = new Date(0);
             }
@@ -1722,7 +2377,7 @@
           }
         });
       });
-    </script>
+    </script>    
     <style>
       .video-js {
         margin: 0 auto;
@@ -1751,5 +2406,232 @@
         height: 53vh;
         max-height: 600px;
         background-color: black;
+      }
+
+      #video-player-modal {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }      #player-container {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        will-change: transform, opacity;
+      }
+
+      @media (max-width: 767px) {
+        #video-player-modal {
+          padding: 1rem;
+          align-items: center;
+          justify-content: center;
+        }
+
+        #player-container {
+          height: auto;
+          max-height: 90vh;
+          padding: 0;
+          max-width: 95vw;
+          width: 100%;
+          border-radius: 1rem;
+        }
+
+        #player-container > div {
+          border-radius: 1rem;
+          height: auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .video-container-mobile {
+          height: 50vh;
+          min-height: 280px;
+          max-height: 400px;
+        }
+
+        #native-player {
+          height: 100%;
+          width: 100%;
+          object-fit: contain;
+        }
+
+        #mobile-controls button {
+          min-width: 44px;
+          min-height: 44px;
+        }
+
+        #mobile-controls {
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        #mobile-controls > div {
+          pointer-events: auto;
+        }
+
+        #mobile-controls .absolute {
+          bottom: 1rem;
+          left: 1rem;
+          right: 1rem;
+        }
+      }
+      @media (min-width: 768px) {
+        .video-container-desktop {
+          height: 60vh;
+          max-height: 600px;
+        }
+      }
+
+      @media (min-width: 768px) {
+        #player-container {
+          aspect-ratio: auto;
+          max-height: 90vh;
+        }
+
+        #mobile-controls {
+          display: none !important;
+        }
+      }
+
+      #loading-overlay {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.05);
+        }
+      }
+
+      #loading-overlay .animate-pulse {
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+
+      #native-player {
+        transition: opacity 0.3s ease;
+      }
+
+      #video-player-modal ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #video-player-modal ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      #video-player-modal ::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 3px;
+      }
+
+      #video-player-modal ::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.5);
+      }
+
+      #player-container button {
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #player-container button:active {
+        transform: scale(0.95);
+      }
+
+      .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      #player-container button:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      @media (max-width: 480px) {
+        #player-container h3 {
+          font-size: 0.875rem;
+        }
+
+        #player-container .text-sm {
+          font-size: 0.75rem;
+        }
+
+        #player-container .text-xs {
+          font-size: 0.6875rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #player-container,
+        #loading-overlay .animate-pulse,
+        .animate-pulse {
+          animation: none;
+          transition: none;
+        }
+      }
+
+      @media (prefers-contrast: high) {
+        #player-container {
+          border: 2px solid #ffffff;
+        }
+
+        #player-container button {
+          border: 1px solid currentColor;
+        }
+      }
+
+      #video-player-modal:-webkit-full-screen {
+        background: black;
+      }
+
+      #video-player-modal:-moz-full-screen {
+        background: black;
+      }
+
+      #video-player-modal:fullscreen {
+        background: black;
+      }
+
+      #error-overlay {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(127, 29, 29, 0.2) 100%);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+
+      #pip-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      @media (max-width: 767px) and (orientation: landscape) {
+        #player-container {
+          height: 100vh;
+        }
+
+        #mobile-controls {
+          bottom: env(safe-area-inset-bottom, 1rem);
+        }
+      }
+
+      @media (max-width: 767px) {
+        #player-container {
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #mobile-controls > div {
+          margin-bottom: env(safe-area-inset-bottom, 1rem);
+        }
       }
     </style>
