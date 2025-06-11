@@ -25,8 +25,8 @@ cd streamdev && node reset-password.js
 **Gallery**
 
 - [ ] tiles/details view
-- [ ] menambahkan info waktu upload
-- [ ] refine video player
+- [x] menambahkan info waktu upload
+- [x] refine video player
       
 **History**
 - [ ] reuse history stream
