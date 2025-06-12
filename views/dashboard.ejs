@@ -143,32 +143,32 @@
     <div class="mb-6">
       <!-- Mobile Tabs - Compact with icons only -->
       <div class="md:hidden border-b border-gray-700">
-        <nav class="-mb-px flex justify-around">
+        <nav class="-mb-px flex justify-around">          
           <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-primary border-primary" 
                   data-tab="all" onclick="switchTab('all')">
             <div class="flex items-center">
-              <i class="ti ti-list text-lg"></i>
+              <i class="ti ti-list text-lg text-primary"></i>
               <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="all-count-mobile">0</span>
             </div>
           </button>
           <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
                   data-tab="live" onclick="switchTab('live')">
             <div class="flex items-center">
-              <i class="ti ti-broadcast text-lg"></i>
+              <i class="ti ti-broadcast text-lg text-gray-400"></i>
               <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="live-count-mobile">0</span>
             </div>
           </button>
           <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
                   data-tab="scheduled" onclick="switchTab('scheduled')">
             <div class="flex items-center">
-              <i class="ti ti-calendar-event text-lg"></i>
+              <i class="ti ti-calendar-event text-lg text-gray-400"></i>
               <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="scheduled-count-mobile">0</span>
             </div>
           </button>
           <button class="stream-tab flex flex-col items-center py-3 px-2 border-b-2 font-medium text-xs transition-colors duration-200 text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300" 
                   data-tab="offline" onclick="switchTab('offline')">
             <div class="flex items-center">
-              <i class="ti ti-zzz text-lg"></i>
+              <i class="ti ti-zzz text-lg text-gray-400"></i>
               <span class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300 min-w-[20px] text-center" id="offline-count-mobile">0</span>
             </div>
           </button>
@@ -1262,18 +1262,18 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            window.allStreams = data.streams;
+            window.allStreams = data.streams;            
             displayStreams(data.streams);
             updateStreamCounters(data.streams);
             setupSearch();
           } else {
             console.error('Error fetching streams:', data.error);
-            showEmptyState();
+            displayStreams([]);
           }
         })
         .catch(error => {
           console.error('Error fetching streams:', error);
-          showEmptyState();
+          displayStreams([]);
         });
 
       let currentTab = 'all';
@@ -1297,26 +1297,39 @@
         const filteredByTab = filterStreamsByTab(streams, window.currentTab);
         displayMobileStreams(filteredByTab);
         displayDesktopStreams(filteredByTab);
-      }
-
+      }      
       window.switchTab = function(tab) {
         window.currentTab = tab;
         
         document.querySelectorAll('.stream-tab').forEach(tabEl => {
           tabEl.classList.remove('text-primary', 'border-primary');
           tabEl.classList.add('text-gray-400', 'border-transparent');
+          
+          const icon = tabEl.querySelector('i');
+          if (icon) {
+            icon.classList.remove('text-primary');
+            icon.classList.add('text-gray-400');
+          }
         });
         
-        const activeTab = document.querySelector(`[data-tab="${tab}"]`);
-        if (activeTab) {
-          activeTab.classList.remove('text-gray-400', 'border-transparent');
-          activeTab.classList.add('text-primary', 'border-primary');
-        }
+        const activeTabs = document.querySelectorAll(`[data-tab="${tab}"]`);
+        activeTabs.forEach(activeTab => {
+          if (activeTab) {
+            activeTab.classList.remove('text-gray-400', 'border-transparent');
+            activeTab.classList.add('text-primary', 'border-primary');
+            
+            const icon = activeTab.querySelector('i');
+            if (icon) {
+              icon.classList.remove('text-gray-400');
+              icon.classList.add('text-primary');
+            }
+          }
+        });
         
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
         
-        let filtered = window.allStreams;
+        let filtered = window.allStreams || [];
         if (searchTerm) {
           filtered = filtered.filter(stream => 
             stream.title.toLowerCase().includes(searchTerm) ||
@@ -1358,32 +1371,54 @@
         document.getElementById('live-count-mobile').textContent = liveStreams;
         document.getElementById('scheduled-count-mobile').textContent = scheduledStreams;
         document.getElementById('offline-count-mobile').textContent = offlineStreams;
-      }
+      }      
       function displayStreams(streams) {
-        if (!streams || streams.length === 0) {
-          showEmptyState();
-          return;
-        }
         displayMobileStreams(streams);
         displayDesktopStreams(streams);
       }
       function displayMobileStreams(streams) {
         const mobileContainer = document.querySelector('.block.md\\:hidden.space-y-4');
         mobileContainer.innerHTML = '';
+        
+        if (!streams || streams.length === 0) {
+          const emptyStateCard = document.createElement('div');
+          emptyStateCard.className = 'bg-gray-800 rounded-lg p-6 text-center';
+          emptyStateCard.innerHTML = `
+            <div class="flex flex-col items-center">
+              <div class="w-16 h-16 rounded-full bg-dark-700 flex items-center justify-center mb-4">
+                <i class="ti ti-broadcast text-gray-500 text-2xl"></i>
+              </div>
+              <p class="text-gray-400 font-medium mb-2">No streams found</p>
+              <p class="text-gray-500 mb-4">Create your first stream to start broadcasting</p>
+            </div>
+          `;
+          mobileContainer.appendChild(emptyStateCard);
+          return;
+        }
+        
         streams.forEach(stream => {
           const card = createMobileStreamCard(stream);
           mobileContainer.appendChild(card);
         });
-      }
+      }      
       function displayDesktopStreams(streams) {
         const tableBody = document.querySelector('.hidden.md\\:block table tbody');
         Array.from(tableBody.querySelectorAll('tr:not(#empty-state)')).forEach(row => {
           row.remove();
         });
         const emptyState = document.getElementById('empty-state');
+        
+        if (!streams || streams.length === 0) {
+          if (emptyState) {
+            emptyState.style.display = 'table-row';
+          }
+          return;
+        }
+        
         if (emptyState) {
           emptyState.style.display = 'none';
         }
+        
         streams.forEach(stream => {
           const row = createStreamTableRow(stream);
           tableBody.insertBefore(row, emptyState);
@@ -1609,32 +1644,7 @@
           </div>
         </td>
       `;
-        return row;
-      }
-      function showEmptyState() {
-        document.querySelectorAll('tbody tr:not(#empty-state)').forEach(el => {
-          el.style.display = 'none';
-        });
-        const emptyState = document.getElementById('empty-state');
-        if (emptyState) {
-          emptyState.style.display = 'table-row';
-        }
-        document.querySelectorAll('.block.md\\:hidden.space-y-4 > div').forEach(el => {
-          el.style.display = 'none';
-        });
-        const mobileContainer = document.querySelector('.block.md\\:hidden.space-y-4');
-        mobileContainer.innerHTML = `
-        <div class="bg-gray-800 rounded-lg p-6 text-center">
-          <div class="flex flex-col items-center">
-            <div class="w-16 h-16 rounded-full bg-dark-700 flex items-center justify-center mb-4">
-              <i class="ti ti-broadcast text-gray-500 text-2xl"></i>
-            </div>
-            <p class="text-gray-400 font-medium mb-2">No streams found</p>
-            <p class="text-gray-500 mb-4">Create your first stream to start broadcasting</p>
-          </div>
-        </div>
-      `;
-      }
+        return row;      }
       function formatDate(date) {
         if (!date) return '';
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
