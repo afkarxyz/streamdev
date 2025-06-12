@@ -41,14 +41,15 @@ cd streamdev && node reset-password.js
 
 **Gallery** ---60%
 
-- [ ] tiles/details view
 - [x] menambahkan info waktu upload
 - [x] refine video player
+- [ ] tiles/details view
 
 ![image](https://github.com/user-attachments/assets/907b979a-429d-44c2-bd41-63e372524a20)
 
-**History** ---50%
+**History** ---60%
 - [x] reuse history stream
+- [x] menambahkan icon pada platform filter
 - [ ] responsive view
 
-![image](https://github.com/user-attachments/assets/0d8b60fe-7eb3-4afd-bdca-35ca39abbbde)
+![image](https://github.com/user-attachments/assets/9d18c070-7cbd-4762-b056-f1b3737f267d)
