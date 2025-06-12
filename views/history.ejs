@@ -55,37 +55,37 @@
   
   <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-700">
-        <thead>
+      <table class="min-w-full divide-y divide-gray-700">        
+        <thead class="hidden md:table-header-group">
           <tr class="bg-dark-700">
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-2/5">
               Stream Name
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-1/6">
               Platform
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-1/6">
               Start Time
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-1/6">
               Stop Time
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">
               Duration
             </th>
-            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider w-1/12">
               Actions
             </th>
           </tr>
-        </thead>
-        <tbody id="history-table-body" class="bg-gray-800 divide-y divide-gray-700">
+        </thead><tbody id="history-table-body" class="bg-gray-800 divide-y divide-gray-700">
           <% if (history && history.length> 0) { %>
-            <% history.forEach(function(entry) { %>
-              <tr class="hover:bg-dark-700/50 transition-colors" data-id="<%= entry.id %>"
+            <% history.forEach(function(entry) { %>              
+              <!-- Desktop View -->
+              <tr class="hidden md:table-row hover:bg-dark-700/50 transition-colors" data-id="<%= entry.id %>"
                 data-platform="<%= entry.platform %>" data-title="<%= entry.title %>">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="w-10 h-6 bg-dark-700 rounded flex-shrink-0 overflow-hidden mr-3">
+                <td class="px-6 py-4">
+                  <div class="flex items-start">
+                    <div class="w-10 h-6 bg-dark-700 rounded flex-shrink-0 overflow-hidden mr-3 mt-0.5">
                       <% if (entry.thumbnail_path) { %>
                         <img src="<%= entry.thumbnail_path %>" class="w-full h-full object-cover"
                           onerror="this.src='/images/default-thumbnail.jpg'">
@@ -95,11 +95,11 @@
                           </div>
                           <% } %>
                     </div>
-                    <div class="text-sm font-medium">
+                    <div class="text-sm font-medium leading-relaxed min-w-0 flex-1">
                       <%= entry.title %>
                     </div>
                   </div>
-                </td>                
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <i class="ti ti-<%= 
@@ -148,19 +148,118 @@
                 </td>
               </tr>
               <% }); %>
-                <% } else { %>
-                  <tr>
-                    <td colspan="6" class="px-6 py-10 text-center text-gray-400">
-                      <div class="flex flex-col items-center">
-                        <i class="ti ti-history text-3xl mb-2"></i>
-                        <p>No stream history found</p>
-                        <p class="text-xs mt-1">Your completed streams will appear here</p>
-                      </div>
-                    </td>
-                  </tr>
-                  <% } %>
+            <% } else { %>
+              <!-- Desktop Empty State -->
+              <tr class="hidden md:table-row">
+                <td colspan="6" class="px-6 py-10 text-center text-gray-400">
+                  <div class="flex flex-col items-center">
+                    <i class="ti ti-history text-3xl mb-2"></i>
+                    <p>No stream history found</p>
+                    <p class="text-xs mt-1">Your completed streams will appear here</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
         </tbody>
       </table>
+      
+      <!-- Mobile Cards View -->
+      <div class="md:hidden p-4 space-y-4">
+        <% if (history && history.length> 0) { %>
+          <% history.forEach(function(entry) { %>
+            <div class="bg-dark-700 rounded-lg p-4 shadow-md hover:bg-dark-600/50 transition-colors" data-id="<%= entry.id %>"
+              data-platform="<%= entry.platform %>" data-title="<%= entry.title %>">
+              
+              <!-- Row 1: Thumbnail, Title, Actions + Platform Icon -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start flex-1 min-w-0">
+                  <div class="w-12 h-7 bg-dark-800 rounded flex-shrink-0 overflow-hidden mr-3">
+                    <% if (entry.thumbnail_path) { %>
+                      <img src="<%= entry.thumbnail_path %>" class="w-full h-full object-cover"
+                        onerror="this.src='/images/default-thumbnail.jpg'">
+                    <% } else { %>
+                      <div class="w-full h-full bg-dark-600 flex items-center justify-center">
+                        <i class="ti ti-video text-gray-400 text-xs"></i>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div class="flex-1 min-w-0 pr-2">
+                    <div class="text-sm font-medium text-white truncate">
+                      <%= entry.title %>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2 ml-2">
+                  <% if (entry.stream_key && entry.rtmp_url) { %>
+                  <button onclick="reuseHistoryEntry('<%= entry.id %>', '<%= entry.title %>')"
+                    class="p-2 text-gray-400 hover:text-green-400 transition-colors"
+                    title="Reuse stream configuration">
+                    <i class="ti ti-recycle text-base"></i>
+                  </button>
+                  <% } %>
+                  <button onclick="deleteHistoryEntry('<%= entry.id %>', '<%= entry.title %>')"
+                    class="p-2 text-gray-400 hover:text-red-400 transition-colors">
+                    <i class="ti ti-trash text-base"></i>
+                  </button>
+                  <!-- Platform Icon - After Delete Button -->
+                  <div class="ml-2">
+                    <i class="ti ti-<%= 
+                      entry.platform === 'YouTube' ? 'brand-youtube' :
+                      entry.platform === 'Facebook' ? 'brand-facebook' :
+                      entry.platform === 'Twitch' ? 'brand-twitch' :
+                      entry.platform === 'TikTok' ? 'brand-tiktok' :
+                      entry.platform === 'Shopee Live' ? 'shopping-bag' :
+                      'broadcast'
+                    %> <%= 
+                      entry.platform === 'YouTube' ? 'text-red-500' :
+                      entry.platform === 'Facebook' ? 'text-blue-500' :
+                      entry.platform === 'Twitch' ? 'text-purple-500' :
+                      entry.platform === 'TikTok' ? 'text-gray-100' :
+                      entry.platform === 'Shopee Live' ? 'text-orange-500' :
+                      'text-gray-400'
+                    %> text-base"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Row 2: Time Information - Labels (Left Aligned) -->
+              <div class="grid grid-cols-3 gap-4 text-xs mb-1">
+                <div class="text-yellow-400 font-medium">
+                  Duration
+                </div>
+                <div class="text-green-400 font-medium">
+                  Start Time
+                </div>
+                <div class="text-red-400 font-medium">
+                  Stop Time
+                </div>
+              </div>
+              
+              <!-- Row 3: Time Values (Left Aligned, Full Format) -->
+              <div class="grid grid-cols-3 gap-4 text-xs text-gray-300">
+                <div>
+                  <%= helpers.formatDuration(entry.duration) %>
+                </div>
+                <div>
+                  <%= helpers.formatDateTime(entry.start_time) %>
+                </div>
+                <div>
+                  <%= helpers.formatDateTime(entry.end_time) %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <!-- Mobile Empty State -->
+          <div class="bg-dark-700 rounded-lg p-8 text-center text-gray-400">
+            <div class="flex flex-col items-center">
+              <i class="ti ti-history text-3xl mb-2"></i>
+              <p>No stream history found</p>
+              <p class="text-xs mt-1">Your completed streams will appear here</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
     </div>
   </div>
   <script>    
@@ -201,11 +300,10 @@
       const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
       const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
       return `${hours}:${minutes}:${secs}`;    
-    }
-
+    }    
     function updateHistoryCount() {
-      const historyRows = document.querySelectorAll('#history-table-body tr[data-id]');
-      const count = historyRows.length;
+      const historyRows = document.querySelectorAll('#history-table-body tr[data-id], .md\\:hidden div[data-id]');
+      const count = historyRows.length / 2;
       const countSpan = document.querySelector('h2 span.text-gray-400');
       const clearBtn = document.getElementById('clear-all-history');
       
@@ -255,21 +353,27 @@
             }
           })
             .then(response => response.json())
-            .then(data => {
+            .then(data => {              
               if (data.success) {
                 showToast('success', 'History entry deleted successfully');                
-                const row = document.querySelector(`tr[data-id="${id}"]`);
-                if (row) {
-                  row.classList.add('animate-fade-out');
+                const rows = document.querySelectorAll(`tr[data-id="${id}"], div[data-id="${id}"]`);
+                if (rows.length > 0) {
+                  rows.forEach(row => {
+                    row.classList.add('animate-fade-out');
+                    setTimeout(() => {
+                      row.remove();
+                    }, 300);
+                  });
+                  
                   setTimeout(() => {
-                    row.remove();
-                    
                     updateHistoryCount();
                     
                     const tableBody = document.getElementById('history-table-body');
-                    if (tableBody.children.length === 0) {
+                    const mobileContainer = document.querySelector('.md\\:hidden.p-4');
+                    if (tableBody.children.length === 0 && mobileContainer.children.length === 0) {
                       tableBody.innerHTML = `
-                      <tr>
+                      <!-- Desktop Empty State -->
+                      <tr class="hidden md:table-row">
                         <td colspan="6" class="px-6 py-10 text-center text-gray-400">
                           <div class="flex flex-col items-center">
                             <i class="ti ti-history text-3xl mb-2"></i>
@@ -279,8 +383,18 @@
                         </td>
                       </tr>
                     `;
+                      mobileContainer.innerHTML = `
+                      <!-- Mobile Empty State -->
+                      <div class="bg-dark-700 rounded-lg p-8 text-center text-gray-400">
+                        <div class="flex flex-col items-center">
+                          <i class="ti ti-history text-3xl mb-2"></i>
+                          <p>No stream history found</p>
+                          <p class="text-xs mt-1">Your completed streams will appear here</p>
+                        </div>
+                      </div>
+                    `;
                     }
-                  }, 300);
+                  }, 350);
                 }
               } else {
                 showToast('error', 'Error: ' + (data.error || 'Failed to delete history entry'));
@@ -329,15 +443,13 @@
           
           filterTable();
         });
-      });
-      
+      });      
       function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         const platform = currentPlatformFilter;
-        const rows = document.querySelectorAll('#history-table-body tr');
+        const rows = document.querySelectorAll('#history-table-body tr[data-id], .md\\:hidden div[data-id]');
         
         rows.forEach(row => {
-          if (row.querySelector('td[colspan]')) return;
           const title = row.getAttribute('data-title').toLowerCase();
           const rowPlatform = row.getAttribute('data-platform');
           const matchesSearch = !searchTerm || title.includes(searchTerm);
@@ -345,16 +457,16 @@
           row.style.display = matchesSearch && matchesPlatform ? '' : 'none';
         });        
         
-        const visibleRows = document.querySelectorAll('#history-table-body tr:not([style*="display: none"])');
-        const emptyStateRow = document.querySelector('#history-table-body tr td[colspan]')?.parentElement;
+        const visibleRows = document.querySelectorAll('#history-table-body tr[data-id]:not([style*="display: none"]), .md\\:hidden div[data-id]:not([style*="display: none"])');
         
-        const actualVisibleRows = visibleRows.length - (emptyStateRow && !emptyStateRow.style.display.includes('none') ? 1 : 0);
-        
-        if (visibleRows.length === 0 && !emptyStateRow) {
+        if (visibleRows.length === 0 && !document.getElementById('empty-search-results-desktop') && !document.getElementById('empty-search-results-mobile')) {
           const tableBody = document.getElementById('history-table-body');
-          const newEmptyRow = document.createElement('tr');
-          newEmptyRow.id = 'empty-search-results';
-          newEmptyRow.innerHTML = `
+          const mobileContainer = document.querySelector('.md\\:hidden.p-4');
+          
+          const newEmptyRowDesktop = document.createElement('tr');
+          newEmptyRowDesktop.id = 'empty-search-results-desktop';
+          newEmptyRowDesktop.className = 'hidden md:table-row';
+          newEmptyRowDesktop.innerHTML = `
           <td colspan="6" class="px-6 py-10 text-center text-gray-400">
             <div class="flex flex-col items-center">
               <i class="ti ti-search text-3xl mb-2"></i>
@@ -363,9 +475,25 @@
             </div>
           </td>
         `;
-          tableBody.appendChild(newEmptyRow);
-        } else if (visibleRows.length > 0 && document.getElementById('empty-search-results')) {
-          document.getElementById('empty-search-results').remove();
+          
+          const newEmptyCardMobile = document.createElement('div');
+          newEmptyCardMobile.id = 'empty-search-results-mobile';
+          newEmptyCardMobile.className = 'bg-dark-700 rounded-lg p-8 text-center text-gray-400';
+          newEmptyCardMobile.innerHTML = `
+          <div class="flex flex-col items-center">
+            <i class="ti ti-search text-3xl mb-2"></i>
+            <p>No matching results found</p>
+            <p class="text-xs mt-1">Try adjusting your search or filter</p>
+          </div>
+        `;
+          
+          tableBody.appendChild(newEmptyRowDesktop);
+          mobileContainer.appendChild(newEmptyCardMobile);
+        } else if (visibleRows.length > 0) {
+          const searchEmptyDesktop = document.getElementById('empty-search-results-desktop');
+          const searchEmptyMobile = document.getElementById('empty-search-results-mobile');
+          if (searchEmptyDesktop) searchEmptyDesktop.remove();
+          if (searchEmptyMobile) searchEmptyMobile.remove();
         }
       }
       
@@ -528,14 +656,13 @@
           }, 200);
         }
       });
-    }
-    document.getElementById('clear-all-history').addEventListener('click', async function() {
-      const rows = Array.from(document.querySelectorAll('#history-table-body tr[data-id]'));
+    }    document.getElementById('clear-all-history').addEventListener('click', async function() {
+      const rows = Array.from(document.querySelectorAll('#history-table-body tr[data-id], .md\\:hidden div[data-id]'));
       if (rows.length === 0) {
         showToast('info', 'No history to clear');
         return;
       }
-      const ids = rows.map(row => row.getAttribute('data-id'));
+      const ids = [...new Set(rows.map(row => row.getAttribute('data-id')))]; // Remove duplicates
       createModalDialog({
         type: 'danger',
         icon: 'ti-trash',
@@ -558,11 +685,13 @@
             rows.forEach(row => {
               row.classList.add('animate-fade-out');
               setTimeout(() => row.remove(), 300);
-            });            
+            });              
             setTimeout(() => {
               const tableBody = document.getElementById('history-table-body');
+              const mobileContainer = document.querySelector('.md\\:hidden.p-4');
               tableBody.innerHTML = `
-                <tr>
+                <!-- Desktop Empty State -->
+                <tr class="hidden md:table-row">
                   <td colspan="6" class="px-6 py-10 text-center text-gray-400">
                     <div class="flex flex-col items-center">
                       <i class="ti ti-history text-3xl mb-2"></i>
@@ -571,6 +700,16 @@
                     </div>
                   </td>
                 </tr>
+              `;
+              mobileContainer.innerHTML = `
+                <!-- Mobile Empty State -->
+                <div class="bg-dark-700 rounded-lg p-8 text-center text-gray-400">
+                  <div class="flex flex-col items-center">
+                    <i class="ti ti-history text-3xl mb-2"></i>
+                    <p>No stream history found</p>
+                    <p class="text-xs mt-1">Your completed streams will appear here</p>
+                  </div>
+                </div>
               `;
               updateHistoryCount();
             }, 350);
@@ -651,7 +790,21 @@
     }
     #platform-filter-btn i:first-child {
       transition: color 0.2s;
-    }    
+    }
+    
+    .min-w-full {
+      table-layout: fixed;
+    }
+    
+    @media (min-width: 768px) {
+      .min-w-full td:first-child {
+        word-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+        max-width: 0;
+      }
+    }
+    
     @media (max-width: 640px) {
       #platform-filter-btn {
         padding: 8px;
@@ -661,6 +814,15 @@
         min-width: 40px;
         font-weight: 500;
         font-size: 0.875rem;
+      }
+      
+      .grid-cols-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      
+      .bg-dark-700:hover {
+        background-color: rgb(55 65 81 / 0.5);
       }
     }
   </style>
