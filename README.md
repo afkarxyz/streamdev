@@ -27,19 +27,19 @@ cd streamdev && node reset-password.js
 
 ## Screenshots
 
-**Dashboard**
+**Dashboard** ✅
 - [x] menambahkan countdown untuk schedule stream
 - [x] menambahkan filter status stream
 - [x] auto refresh page saat live dimulai
 
 ![image](https://github.com/user-attachments/assets/955ee49c-1c6e-4dba-859c-654bd164fa5c)
 
-**Gallery, History, Analitycs**
+**Gallery, History, Analitycs** ✅
 - [x] tombol clear all
             
 ![image](https://github.com/user-attachments/assets/2369562a-39a8-4c53-996b-e21387891e1e)
 
-**Gallery**
+**Gallery** ---60%
 
 - [ ] tiles/details view
 - [x] menambahkan info waktu upload
@@ -47,7 +47,7 @@ cd streamdev && node reset-password.js
 
 ![image](https://github.com/user-attachments/assets/907b979a-429d-44c2-bd41-63e372524a20)
 
-**History**
+**History** ---50%
 - [x] reuse history stream
 - [ ] responsive view
 
