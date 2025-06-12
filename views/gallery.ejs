@@ -45,7 +45,8 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <!-- Desktop grid layout (hidden on mobile) -->
+    <div class="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       <% if (videos && videos.length> 0) { %>
         <% videos.forEach(function(video) { %>
           <div class="bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
@@ -102,6 +103,84 @@
           <% }); %>
             <% } else { %>              
               <div class="col-span-full text-center py-12">
+                <div class="text-gray-500 mb-3">
+                  <i class="ti ti-video-off text-4xl"></i>
+                </div>
+                <h3 class="text-xl font-medium text-gray-500 mb-1">No videos yet</h3>
+                <p class="text-gray-500 mb-4">Upload your first video to get started</p>
+              </div>
+              <% } %>
+    </div>
+
+    <!-- Mobile compact layout (visible only on mobile) -->
+    <div class="md:hidden space-y-3">
+      <% if (videos && videos.length> 0) { %>
+        <% videos.forEach(function(video) { %>          
+          <div class="bg-dark-700 rounded-lg p-3 hover:bg-dark-600 transition-colors relative">
+            <!-- Action buttons - Top Right Corner -->
+            <div class="absolute top-2 right-2 flex gap-1 z-10">
+              <button class="bg-dark-800/80 hover:bg-dark-600 text-gray-400 hover:text-white p-2 rounded-lg transition-colors backdrop-blur-sm"
+                onclick="showRenameDialog('<%= video.id %>', '<%= video.title %>')">
+                <i class="ti ti-pencil text-sm"></i>
+              </button>
+              <button class="bg-dark-800/80 hover:bg-red-600 text-gray-400 hover:text-white p-2 rounded-lg transition-colors backdrop-blur-sm"
+                onclick="showDeleteDialog('<%= video.id %>', '<%= video.title %>')">
+                <i class="ti ti-trash text-sm"></i>
+              </button>
+            </div>
+
+            <div class="flex gap-3">
+              <!-- Thumbnail -->
+              <div class="relative flex-shrink-0 w-20 h-14 rounded overflow-hidden">
+                <img src="<%= video.thumbnail_path %>" alt="<%= video.title %>" class="w-full h-full object-cover">
+                
+                <!-- Play button overlay -->
+                <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <button
+                    class="play-button bg-black/60 hover:bg-primary/80 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                    data-video-id="<%= video.id %>" data-video-title="<%= video.title %>"
+                    onclick="playVideo('<%= video.id %>', '<%= video.title %>')">
+                    <i class="ti ti-player-play-filled text-xs text-white"></i>
+                  </button>
+                </div>
+
+                <!-- Duration badge -->
+                <span class="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 py-0.5 rounded">
+                  <%= typeof formatDuration==='function' ? formatDuration(video.duration) : (video.duration ?
+                    Math.floor(video.duration / 60) + ':' + String(Math.floor(video.duration % 60)).padStart(2, '0' )
+                    : '0:00' ) %>
+                </span>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0 pr-16">
+                <!-- Title and details -->
+                <div class="space-y-1">
+                  <h3 class="font-medium text-white text-sm leading-tight line-clamp-2 break-words">
+                    <%= video.title %>
+                  </h3>
+                  <div class="flex flex-col text-xs text-gray-400 space-y-0.5">
+                    <div class="flex items-center">
+                      <i class="ti ti-calendar text-[10px] mr-1 flex-shrink-0"></i>
+                      <span class="truncate">
+                        <%= formatDate(video.upload_date) %>
+                      </span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="ti ti-file text-[10px] mr-1 flex-shrink-0"></i>
+                      <span class="truncate">
+                        <%= typeof formatFileSize==='function' ? formatFileSize(video.file_size) : (video.file_size / (1024
+                          * 1024)).toFixed(1) + ' MB' %>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+            <% } else { %>              
+              <div class="text-center py-12">
                 <div class="text-gray-500 mb-3">
                   <i class="ti ti-video-off text-4xl"></i>
                 </div>
@@ -1629,7 +1708,7 @@
             progressItem.innerHTML = `
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium truncate mr-2">${file.name}</span>
-                <span class="text-xs text-gray-400 shrink-0" id="progress-${index}">0%</span>
+                <span class="text-xs text-gray-400" id="progress-${index}">0%</span>
               </div>
               <div class="w-full bg-dark-700 rounded-full h-1.5">
                 <div id="progressbar-${index}" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -2100,13 +2179,14 @@
             console.error('Error monitoring import progress:', error);
           }
         }, 1000);
-      }      
+      }        
       document.addEventListener('DOMContentLoaded', function () {        
         const searchInput = document.querySelector('input[placeholder="Search videos..."]');
         const sortToggleBtn = document.getElementById('sort-toggle-btn');
         const sortIcon = document.getElementById('sort-icon');
-        const videoGrid = document.querySelector('.grid');
-        const allVideosElements = Array.from(document.querySelectorAll('.grid > div:not(.col-span-full)'));
+        const videoGrid = document.querySelector('.hidden.md\\:grid');
+        const mobileContainer = document.querySelector('.md\\:hidden.space-y-3');
+        const allVideosElements = Array.from(document.querySelectorAll('.hidden.md\\:grid > div:not(.col-span-full)'));
         const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
         const paginationButtons = document.querySelectorAll('.mt-6.flex.items-center.justify-between button');
 
@@ -2115,7 +2195,7 @@
         let totalPages = 1;
         let currentSort = localStorage.getItem('gallery-sort') || 'Newest';
 
-        if (allVideosElements.length === 0) return;        
+        if (allVideosElements.length === 0) return;
         
         updateSortDisplay(currentSort);
           function updateSortDisplay(sortOrder) {
@@ -2126,8 +2206,7 @@
             sortIcon.className = 'ti ti-sort-descending text-lg';
             sortToggleBtn.title = 'Sort: Newest';
           }
-        }
-        
+        }        
         window.allVideosData = allVideosElements.map(videoEl => {
           const dateText = videoEl.querySelector('.text-xs.text-gray-400 span:first-child').textContent.trim();
           let dateObj;
@@ -2156,11 +2235,39 @@
             dateObj = new Date(0);
           }
 
+          const playButton = videoEl.querySelector('.play-button');
+          const id = playButton ? playButton.getAttribute('data-video-id') : '';
+          const title = videoEl.querySelector('h3').textContent;
+          const thumbnail = videoEl.querySelector('img').src;
+          const durationText = videoEl.querySelector('.absolute.bottom-2.right-2').textContent.trim();
+          const fileSizeText = videoEl.querySelector('.text-xs.text-gray-400 span:last-child').textContent.trim();
+          
+          let duration = 0;
+          if (durationText) {
+            const durationParts = durationText.split(':');
+            if (durationParts.length === 2) {
+              duration = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
+            }
+          }
+          
+          let file_size = 0;
+          if (fileSizeText && fileSizeText.includes('MB')) {
+            const sizeMatch = fileSizeText.match(/([\d.]+)\s*MB/);
+            if (sizeMatch) {
+              file_size = parseFloat(sizeMatch[1]) * 1024 * 1024;
+            }
+          }          
           return {
             element: videoEl,
-            title: videoEl.querySelector('h3').textContent.toLowerCase(),
+            id: id,
+            title: title,
+            titleLower: title.toLowerCase(),
+            thumbnail: thumbnail,
+            duration: duration,
+            upload_date: dateText,
+            file_size: file_size,
             date: dateObj,
-            size: videoEl.querySelector('.text-xs.text-gray-400 span:last-child').textContent
+            size: fileSizeText
           };
         });
 
@@ -2219,7 +2326,7 @@
             pageButton.addEventListener('click', () => {
               if (i !== currentPage) {
                 currentPage = i;
-                filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), currentSort, currentPage);
+                filterAndDisplayVideos(searchInput.value.toLowerCase().trim(), newSort, currentPage);
               }
             });
             paginationButtonsContainer.appendChild(pageButton);
@@ -2236,11 +2343,94 @@
             }
           });
           paginationButtonsContainer.appendChild(nextButton);
-        }
+        }        
+        function createMobileCard(video) {
+          const card = document.createElement('div');
+          card.className = 'bg-dark-700 rounded-lg p-3 hover:bg-dark-600 transition-colors relative';
+          
+          const formatDuration = (duration) => {
+            if (!duration) return '0:00';
+            const minutes = Math.floor(duration / 60);
+            const seconds = Math.floor(duration % 60);
+            return `${minutes}:${String(seconds).padStart(2, '0')}`;
+          };
+          
+          const formatFileSize = (bytes) => {
+            if (!bytes) return '0 MB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+          };
+          
+          const formatDate = (dateString) => {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+          };
 
+          card.innerHTML = `
+            <!-- Action buttons - Top Right Corner -->
+            <div class="absolute top-2 right-2 flex gap-1 z-10">
+              <button class="bg-dark-800/80 hover:bg-dark-600 text-gray-400 hover:text-white p-2 rounded-lg transition-colors backdrop-blur-sm"
+                onclick="showRenameDialog('${video.id}', '${video.title.replace(/'/g, "\\'")}')">
+                <i class="ti ti-pencil text-sm"></i>
+              </button>
+              <button class="bg-dark-800/80 hover:bg-red-600 text-gray-400 hover:text-white p-2 rounded-lg transition-colors backdrop-blur-sm"
+                onclick="showDeleteDialog('${video.id}', '${video.title.replace(/'/g, "\\'")}')">
+                <i class="ti ti-trash text-sm"></i>
+              </button>
+            </div>
+
+            <div class="flex gap-3">
+              <!-- Thumbnail -->
+              <div class="relative flex-shrink-0 w-20 h-14 rounded overflow-hidden">
+                <img src="${video.thumbnail}" alt="${video.title}" class="w-full h-full object-cover">
+                
+                <!-- Play button overlay -->
+                <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <button
+                    class="play-button bg-black/60 hover:bg-primary/80 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                    data-video-id="${video.id}" data-video-title="${video.title}"
+                    onclick="playVideo('${video.id}', '${video.title.replace(/'/g, "\\'")}')">
+                    <i class="ti ti-player-play-filled text-xs text-white"></i>
+                  </button>
+                </div>
+
+                <!-- Duration badge -->
+                <span class="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 py-0.5 rounded">
+                  ${formatDuration(video.duration)}
+                </span>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0 pr-16">
+                <!-- Title and details -->
+                <div class="space-y-1">
+                  <h3 class="font-medium text-white text-sm leading-tight line-clamp-2 break-words">
+                    ${video.title}
+                  </h3>
+                  <div class="flex flex-col text-xs text-gray-400 space-y-0.5">
+                    <div class="flex items-center">
+                      <i class="ti ti-calendar text-[10px] mr-1 flex-shrink-0"></i>
+                      <span class="truncate">
+                        ${formatDate(video.upload_date)}
+                      </span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="ti ti-file text-[10px] mr-1 flex-shrink-0"></i>
+                      <span class="truncate">
+                        ${formatFileSize(video.file_size)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          return card;
+        }        
         function filterAndDisplayVideos(searchTerm, sortOrder, page) {
           let filteredVideos = window.allVideosData.filter(video =>
-            video.title.includes(searchTerm)
+            video.titleLower.includes(searchTerm)
           );
 
           filteredVideos.forEach(video => {
@@ -2253,13 +2443,22 @@
             filteredVideos.sort((a, b) => a.date.getTime() - b.date.getTime());
           } else {
             filteredVideos.sort((a, b) => b.date.getTime() - a.date.getTime());
-          }
-
+          }          
           videoGrid.innerHTML = '';
+          mobileContainer.innerHTML = '';
 
           if (filteredVideos.length === 0) {
             videoGrid.innerHTML = `
               <div class="col-span-full text-center py-12">
+                <div class="text-gray-500 mb-3">
+                  <i class="ti ti-search text-6xl"></i>
+                </div>
+                <h3 class="text-xl font-medium text-gray-300 mb-1">No videos found</h3>
+                <p class="text-gray-500 mb-4">Try adjusting your search criteria</p>
+              </div>
+            `;
+            mobileContainer.innerHTML = `
+              <div class="text-center py-12">
                 <div class="text-gray-500 mb-3">
                   <i class="ti ti-search text-6xl"></i>
                 </div>
@@ -2277,6 +2476,8 @@
 
             currentPageVideos.forEach(video => {
               videoGrid.appendChild(video.element.cloneNode(true));
+              const mobileCard = createMobileCard(video);
+              mobileContainer.appendChild(mobileCard);
             });
 
             videoGrid.querySelectorAll('.play-button').forEach(button => {
@@ -2284,6 +2485,33 @@
               const videoTitle = button.getAttribute('data-video-title');
               button.onclick = function () {
                 playVideo(videoId, videoTitle);
+              };
+            });
+            mobileContainer.querySelectorAll('.play-button').forEach(button => {
+              const videoId = button.getAttribute('data-video-id');
+              const videoTitle = button.getAttribute('data-video-title');
+              button.onclick = function () {
+                playVideo(videoId, videoTitle);
+              };
+            });
+
+            mobileContainer.querySelectorAll('button[onclick^="showRenameDialog"]').forEach(button => {
+              const onclick = button.getAttribute('onclick');
+              button.onclick = function () {
+                const match = onclick.match(/showRenameDialog\('([^']+)',\s*'([^']+)'\)/);
+                if (match) {
+                  showRenameDialog(match[1], match[2]);
+                }
+              };
+            });
+
+            mobileContainer.querySelectorAll('button[onclick^="showDeleteDialog"]').forEach(button => {
+              const onclick = button.getAttribute('onclick');
+              button.onclick = function () {
+                const match = onclick.match(/showDeleteDialog\('([^']+)',\s*'([^']+)'\)/);
+                if (match) {
+                  showDeleteDialog(match[1], match[2]);
+                }
               };
             });
 

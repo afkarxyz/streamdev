@@ -426,24 +426,29 @@
         }
       });
       
-      const platformOptions = document.querySelectorAll('.platform-filter-option');
+      const platformOptions = document.querySelectorAll('.platform-filter-option');      
       platformOptions.forEach(option => {
         option.addEventListener('click', function() {
           const platform = this.getAttribute('data-platform');
-          const icon = this.querySelector('i').className;
+          const iconElement = this.querySelector('i');
           const text = this.querySelector('span').textContent;
           
           currentPlatformFilter = platform;
           
           const btnIcon = platformFilterBtn.querySelector('i:first-child');
-          btnIcon.className = icon;
+          
+          const iconClasses = iconElement.className.split(' ');
+          const tiIconClass = iconClasses.find(cls => cls.startsWith('ti-') && cls !== 'ti');
+          const colorClass = iconClasses.find(cls => cls.startsWith('text-'));
+          
+          btnIcon.className = `ti ${tiIconClass} ${colorClass}`;
           selectedPlatformText.textContent = text;
           
           platformFilterDropdown.classList.add('hidden');
           
           filterTable();
         });
-      });      
+      });
       function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         const platform = currentPlatformFilter;
@@ -656,13 +661,14 @@
           }, 200);
         }
       });
-    }    document.getElementById('clear-all-history').addEventListener('click', async function() {
+    }    
+    document.getElementById('clear-all-history').addEventListener('click', async function() {
       const rows = Array.from(document.querySelectorAll('#history-table-body tr[data-id], .md\\:hidden div[data-id]'));
       if (rows.length === 0) {
         showToast('info', 'No history to clear');
         return;
       }
-      const ids = [...new Set(rows.map(row => row.getAttribute('data-id')))]; // Remove duplicates
+      const ids = [...new Set(rows.map(row => row.getAttribute('data-id')))];
       createModalDialog({
         type: 'danger',
         icon: 'ti-trash',
