@@ -29,7 +29,7 @@ cd streamdev && node reset-password.js
 - [x] refine video player
       
 **History**
-- [ ] reuse history stream
+- [x] reuse history stream
 - [ ] responsive view
 
 **Global**
