@@ -2577,45 +2577,18 @@
             if (modal) {
               document.body.classList.remove('overflow-hidden');
               modal.remove();
-            }
+            }            
             const btn = document.getElementById('clear-all-videos');
             btn.disabled = true;
             btn.classList.add('opacity-60', 'pointer-events-none');
             try {
               await Promise.all(ids.map(id => fetch(`/api/videos/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })));
-              const cards = document.querySelectorAll('.grid [onclick^="playVideo("]');
-              cards.forEach(btn => {
-                const card = btn.closest('.bg-gray-800');
-                if (card) {
-                  card.classList.add('animate-fade-out');
-                  setTimeout(() => card.remove(), 300);
-                }
-              });              
-              setTimeout(() => {
-                const grid = document.querySelector('.grid');
-                if (grid) {
-                  grid.innerHTML = `<div class=\"col-span-full text-center py-12">
-                    <div class=\"text-gray-500 mb-3">
-                      <i class=\"ti ti-video-off text-4xl\"></i>
-                    </div>
-                    <h3 class=\"text-xl font-medium text-gray-500 mb-1\">No videos yet</h3>
-                    <p class=\"text-gray-500 mb-4\">Upload your first video to get started</p>
-                  </div>`;
-                }
-                const countSpan = document.querySelector('h2 span.text-gray-400');
-                if (countSpan) countSpan.textContent = '';
-                
-                const paginationContainer = document.querySelector('.mt-6.flex.items-center.justify-between');
-                if (paginationContainer) {
-                  paginationContainer.style.display = 'none';
-                }
-                
-                if (window.allVideosData) window.allVideosData = [];
-              }, 350);
               showToast('success', 'All videos deleted successfully');
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
             } catch (e) {
               showToast('error', 'Failed to delete all videos');
-            } finally {
               btn.disabled = false;
               btn.classList.remove('opacity-60', 'pointer-events-none');
             }
