@@ -8,18 +8,44 @@
         <input type="text" id="history-search" placeholder="Search history..."
           class="bg-dark-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary w-full">
         <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>          
+      <div class="relative">
+        <button type="button" id="platform-filter-btn"
+          class="px-4 py-2 bg-dark-700 border border-gray-600 text-white rounded-lg hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary transition-colors flex items-center gap-2 h-[40px] min-w-[40px] sm:min-w-[140px]">
+          <i class="ti ti-apps text-green-400"></i>
+          <span id="selected-platform-text" class="hidden sm:inline">All Platforms</span>
+          <i class="ti ti-chevron-down text-gray-400 ml-auto hidden sm:inline"></i>
+        </button>
+        <div id="platform-filter-dropdown"
+          class="hidden absolute z-10 right-0 mt-1 w-48 bg-dark-700 rounded-lg border border-gray-600 shadow-lg overflow-hidden">
+          <div class="py-1">
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="all">
+              <i class="ti ti-apps text-green-400 text-base mr-2"></i>
+              <span class="text-sm">All Platforms</span>
+            </button>
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="YouTube">
+              <i class="ti ti-brand-youtube text-red-500 text-base mr-2"></i>
+              <span class="text-sm">YouTube</span>
+            </button>
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="Facebook">
+              <i class="ti ti-brand-facebook text-blue-500 text-base mr-2"></i>
+              <span class="text-sm">Facebook</span>
+            </button>
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="Twitch">
+              <i class="ti ti-brand-twitch text-purple-500 text-base mr-2"></i>
+              <span class="text-sm">Twitch</span>
+            </button>
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="TikTok">
+              <i class="ti ti-brand-tiktok text-gray-100 text-base mr-2"></i>
+              <span class="text-sm">TikTok</span>
+            </button>
+            <button type="button" class="platform-filter-option w-full flex items-center px-4 py-2 hover:bg-dark-600" data-platform="Custom">
+              <i class="ti ti-broadcast text-gray-400 text-base mr-2"></i>
+              <span class="text-sm">Custom</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="w-40">
-        <select id="platform-filter"
-          class="bg-dark-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary w-full">
-          <option value="all">All Platforms</option>          
-          <option value="YouTube">YouTube</option>
-          <option value="Facebook">Facebook</option>
-          <option value="Twitch">Twitch</option>
-          <option value="TikTok">TikTok</option>
-          <option value="Custom">Custom</option>
-        </select>      
-      </div>      
       <button id="clear-all-history" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2 h-[40px]<% if (!history || history.length === 0) { %> hidden<% } %>">
         <i class="ti ti-trash"></i> 
         <span class="hidden sm:inline">Clear</span>
@@ -266,14 +292,50 @@
             });
         }
       });
-    }    
+    }      
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.getElementById('history-search');
-      const platformFilter = document.getElementById('platform-filter');
+      const platformFilterBtn = document.getElementById('platform-filter-btn');
+      const platformFilterDropdown = document.getElementById('platform-filter-dropdown');
+      const selectedPlatformText = document.getElementById('selected-platform-text');
+      
+      let currentPlatformFilter = 'all';
+      
+      platformFilterBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        platformFilterDropdown.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!platformFilterBtn.contains(e.target) && !platformFilterDropdown.contains(e.target)) {
+          platformFilterDropdown.classList.add('hidden');
+        }
+      });
+      
+      const platformOptions = document.querySelectorAll('.platform-filter-option');
+      platformOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const platform = this.getAttribute('data-platform');
+          const icon = this.querySelector('i').className;
+          const text = this.querySelector('span').textContent;
+          
+          currentPlatformFilter = platform;
+          
+          const btnIcon = platformFilterBtn.querySelector('i:first-child');
+          btnIcon.className = icon;
+          selectedPlatformText.textContent = text;
+          
+          platformFilterDropdown.classList.add('hidden');
+          
+          filterTable();
+        });
+      });
+      
       function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
-        const platform = platformFilter.value;
+        const platform = currentPlatformFilter;
         const rows = document.querySelectorAll('#history-table-body tr');
+        
         rows.forEach(row => {
           if (row.querySelector('td[colspan]')) return;
           const title = row.getAttribute('data-title').toLowerCase();
@@ -282,6 +344,7 @@
           const matchesPlatform = platform === 'all' || rowPlatform === platform;
           row.style.display = matchesSearch && matchesPlatform ? '' : 'none';
         });        
+        
         const visibleRows = document.querySelectorAll('#history-table-body tr:not([style*="display: none"])');
         const emptyStateRow = document.querySelector('#history-table-body tr td[colspan]')?.parentElement;
         
@@ -305,9 +368,9 @@
           document.getElementById('empty-search-results').remove();
         }
       }
+      
       searchInput.addEventListener('input', filterTable);
-      platformFilter.addEventListener('change', filterTable);
-    });      
+    });
     function showToast(type, message) {
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-4 right-4 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
@@ -568,4 +631,36 @@
       });
     }
 
-  </script>
+  </script>  
+  <style>
+    #platform-filter-dropdown {
+      transform-origin: top right;
+      transition: transform 0.2s, opacity 0.2s;
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    #platform-filter-dropdown:not(.hidden) {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .platform-filter-option:hover i {
+      transform: scale(1.1);
+    }
+    .platform-filter-option i {
+      transition: transform 0.2s;
+    }
+    #platform-filter-btn i:first-child {
+      transition: color 0.2s;
+    }    
+    @media (max-width: 640px) {
+      #platform-filter-btn {
+        padding: 8px;
+        gap: 0;
+        justify-content: center;
+        width: 40px;
+        min-width: 40px;
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+    }
+  </style>
