@@ -573,6 +573,73 @@ app.delete('/api/history/:id', isAuthenticated, async (req, res) => {
   }
 });
 
+app.post('/api/history/reuse/:id', isAuthenticated, async (req, res) => {
+  try {
+    const db = require('./db/database').db;
+    const historyId = req.params.id;
+    
+    const history = await new Promise((resolve, reject) => {
+      db.get(
+        'SELECT * FROM stream_history WHERE id = ? AND user_id = ?',
+        [historyId, req.session.userId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
+    
+    if (!history) {
+      return res.status(404).json({
+        success: false,
+        error: 'History entry not found or not authorized'
+      });
+    }
+    
+    if (!history.stream_key || !history.rtmp_url) {
+      return res.status(400).json({
+        success: false,
+        error: 'Stream key and RTMP URL not available for this history entry'
+      });
+    }
+    
+    const Stream = require('./models/Stream');
+    const { v4: uuidv4 } = require('uuid');
+    
+    const newStreamData = {
+      id: uuidv4(),
+      title: history.title,
+      video_id: history.video_id,
+      rtmp_url: history.rtmp_url,
+      stream_key: history.stream_key,
+      platform: history.platform,
+      platform_icon: history.platform_icon,
+      bitrate: history.bitrate || 2500,
+      resolution: history.resolution,
+      fps: history.fps || 30,
+      orientation: 'horizontal',
+      loop_video: true,
+      use_advanced_settings: history.use_advanced_settings || false,
+      status: 'offline',
+      user_id: req.session.userId
+    };
+    
+    const newStream = await Stream.create(newStreamData);
+    
+    res.json({ 
+      success: true, 
+      message: 'Stream configuration reused successfully',
+      streamId: newStream.id
+    });
+  } catch (error) {
+    console.error('Error reusing history entry:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reuse stream configuration'
+    });
+  }
+});
+
 const videoAnalytics = new VideoAnalytics();
 
 app.post('/api/analytics/add-video', isAuthenticated, [

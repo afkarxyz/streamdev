@@ -78,7 +78,7 @@ function createTables() {
     if (err) {
       console.error('Error creating streams table:', err.message);
     }
-  });
+  });  
   db.run(`CREATE TABLE IF NOT EXISTS stream_history (
     id TEXT PRIMARY KEY,
     stream_id TEXT,
@@ -94,6 +94,8 @@ function createTables() {
     end_time TIMESTAMP,
     duration INTEGER,
     use_advanced_settings BOOLEAN DEFAULT 0,
+    stream_key TEXT,
+    rtmp_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
@@ -103,6 +105,12 @@ function createTables() {
     if (err) {
       console.error('Error creating stream_history table:', err.message);
     }
+  });
+
+  db.run(`ALTER TABLE stream_history ADD COLUMN stream_key TEXT`, (err) => {
+  });
+  
+  db.run(`ALTER TABLE stream_history ADD COLUMN rtmp_url TEXT`, (err) => {
   });
   db.run(`CREATE TABLE IF NOT EXISTS video_analytics (
     id TEXT PRIMARY KEY,

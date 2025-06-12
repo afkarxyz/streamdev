@@ -104,9 +104,16 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <%= helpers.formatDuration(entry.duration) %>
-                </td>
+                </td>                
                 <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="flex items-center justify-end space-x-2">
+                    <% if (entry.stream_key && entry.rtmp_url) { %>
+                    <button onclick="reuseHistoryEntry('<%= entry.id %>', '<%= entry.title %>')"
+                      class="p-1.5 text-gray-400 hover:text-green-400 transition-colors"
+                      title="Reuse stream configuration">
+                      <i class="ti ti-recycle"></i>
+                    </button>
+                    <% } %>
                     <button onclick="deleteHistoryEntry('<%= entry.id %>', '<%= entry.title %>')"
                       class="p-1.5 text-gray-400 hover:text-red-400 transition-colors">
                       <i class="ti ti-trash"></i>
@@ -167,8 +174,32 @@
       const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
       const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
       const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-      return `${hours}:${minutes}:${secs}`;
-    }    
+      return `${hours}:${minutes}:${secs}`;    
+    }
+
+    function updateHistoryCount() {
+      const historyRows = document.querySelectorAll('#history-table-body tr[data-id]');
+      const count = historyRows.length;
+      const countSpan = document.querySelector('h2 span.text-gray-400');
+      const clearBtn = document.getElementById('clear-all-history');
+      
+      if (count > 0) {
+        if (countSpan) {
+          countSpan.textContent = `(${count})`;
+        }
+        if (clearBtn) {
+          clearBtn.classList.remove('hidden');
+        }
+      } else {
+        if (countSpan) {
+          countSpan.textContent = '';
+        }
+        if (clearBtn) {
+          clearBtn.classList.add('hidden');
+        }
+      }
+    }
+
     function deleteHistoryEntry(id, title) {
       createModalDialog({
         type: 'danger',
@@ -200,12 +231,15 @@
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                showToast('success', 'History entry deleted successfully');
+                showToast('success', 'History entry deleted successfully');                
                 const row = document.querySelector(`tr[data-id="${id}"]`);
                 if (row) {
                   row.classList.add('animate-fade-out');
                   setTimeout(() => {
                     row.remove();
+                    
+                    updateHistoryCount();
+                    
                     const tableBody = document.getElementById('history-table-body');
                     if (tableBody.children.length === 0) {
                       tableBody.innerHTML = `
@@ -247,9 +281,12 @@
           const matchesSearch = !searchTerm || title.includes(searchTerm);
           const matchesPlatform = platform === 'all' || rowPlatform === platform;
           row.style.display = matchesSearch && matchesPlatform ? '' : 'none';
-        });
+        });        
         const visibleRows = document.querySelectorAll('#history-table-body tr:not([style*="display: none"])');
         const emptyStateRow = document.querySelector('#history-table-body tr td[colspan]')?.parentElement;
+        
+        const actualVisibleRows = visibleRows.length - (emptyStateRow && !emptyStateRow.style.display.includes('none') ? 1 : 0);
+        
         if (visibleRows.length === 0 && !emptyStateRow) {
           const tableBody = document.getElementById('history-table-body');
           const newEmptyRow = document.createElement('tr');
@@ -458,7 +495,7 @@
             rows.forEach(row => {
               row.classList.add('animate-fade-out');
               setTimeout(() => row.remove(), 300);
-            });
+            });            
             setTimeout(() => {
               const tableBody = document.getElementById('history-table-body');
               tableBody.innerHTML = `
@@ -472,18 +509,63 @@
                   </td>
                 </tr>
               `;
-              const countSpan = document.querySelector('h2 span.text-gray-400');
-              if (countSpan) countSpan.textContent = '';
+              updateHistoryCount();
             }, 350);
             showToast('success', 'All history entries deleted successfully');
           } catch (e) {
             showToast('error', 'Failed to delete all history entries');
-          } finally {
+          } finally {            
             btn.disabled = false;
             btn.classList.remove('opacity-60', 'pointer-events-none');
           }
         }
       });
     });
+
+    function reuseHistoryEntry(historyId, title) {
+      createModalDialog({
+        type: 'info',
+        icon: 'ti-recycle',
+        title: 'Reuse Stream Configuration',
+        message: `Reuse the stream configuration from "${title}"? This will create a new stream with the same settings.`,
+        confirmText: 'Reuse',
+        cancelText: 'Cancel'
+      }).then(result => {
+        if (result.confirmed) {
+          const modal = document.getElementById('custom-modal');
+          if (modal) {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+              modalContent.classList.replace('opacity-100', 'opacity-0');
+              modalContent.classList.replace('scale-100', 'scale-95');
+            }
+            setTimeout(() => {
+              document.body.classList.remove('overflow-hidden');
+              modal.remove();
+            }, 200);
+          }
+          
+          fetch(`/api/history/reuse/${historyId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'Stream configuration reused successfully');
+                window.location.href = '/dashboard';
+              } else {
+                showToast('error', 'Error: ' + (data.error || 'Failed to reuse stream configuration'));
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('error', 'An error occurred while reusing stream configuration');
+            });
+        }
+      });
+    }
 
   </script>

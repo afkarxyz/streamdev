@@ -28,6 +28,9 @@ function openNewStreamModal() {
     const icon = advancedSettingsToggle.querySelector('i');
     if (icon) icon.style.transform = '';
   }
+  
+  applyStreamKeyVisibility();
+  
   requestAnimationFrame(() => {
     modal.classList.add('active');
   });
@@ -299,16 +302,38 @@ document.addEventListener('DOMContentLoaded', () => {
     resolutionSelect.addEventListener('change', updateResolutionDisplay);
     setVideoOrientation('horizontal');
   }
+  
+  applyStreamKeyVisibility();
 });
 function toggleStreamKeyVisibility() {
   const streamKeyInput = document.getElementById('streamKey');
   const streamKeyToggle = document.getElementById('streamKeyToggle');
+  
   if (streamKeyInput.type === 'password') {
     streamKeyInput.type = 'text';
     streamKeyToggle.className = 'ti ti-eye-off';
+    localStorage.setItem('streamKeyVisibility', 'visible');
   } else {
     streamKeyInput.type = 'password';
     streamKeyToggle.className = 'ti ti-eye';
+    localStorage.setItem('streamKeyVisibility', 'hidden');
+  }
+}
+
+function applyStreamKeyVisibility() {
+  const streamKeyInput = document.getElementById('streamKey');
+  const streamKeyToggle = document.getElementById('streamKeyToggle');
+  
+  if (streamKeyInput && streamKeyToggle) {
+    const savedVisibility = localStorage.getItem('streamKeyVisibility');
+    
+    if (savedVisibility === 'visible') {
+      streamKeyInput.type = 'text';
+      streamKeyToggle.className = 'ti ti-eye-off';
+    } else {
+      streamKeyInput.type = 'password';
+      streamKeyToggle.className = 'ti ti-eye';
+    }
   }
 }
 document.addEventListener('DOMContentLoaded', function () {

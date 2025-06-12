@@ -1353,7 +1353,8 @@
           default:
             return streams;
         }
-      }      function updateStreamCounters(streams) {
+      }      
+      function updateStreamCounters(streams) {
         const liveStreams = streams.filter(stream => stream.status === 'live').length;
         const scheduledStreams = streams.filter(stream => stream.status === 'scheduled').length;
         const offlineStreams = streams.filter(stream => stream.status === 'offline').length;
@@ -1644,7 +1645,8 @@
           </div>
         </td>
       `;
-        return row;      }
+        return row;      
+      }
       function formatDate(date) {
         if (!date) return '';
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -2122,8 +2124,11 @@
         advancedSettingsContent.classList.remove('hidden');
       } else {
         advancedSettingsToggle.checked = false;
-        advancedSettingsContent.classList.add('hidden');
+        advancedSettingsContent.classList.add('hidden');      
       }
+      
+      applyEditStreamKeyVisibility();
+      
       const modal = document.getElementById('editStreamModal');
       document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
@@ -2318,7 +2323,7 @@
       if (resValue) {
         document.getElementById('editCurrentResolution').textContent = resValue;
       }
-    }
+    }    
     function toggleEditStreamKeyVisibility() {
       const keyInput = document.getElementById('editStreamKey');
       const eyeIcon = document.getElementById('editStreamKeyToggle');
@@ -2326,10 +2331,31 @@
         keyInput.type = 'text';
         eyeIcon.classList.remove('ti-eye');
         eyeIcon.classList.add('ti-eye-off');
+        localStorage.setItem('streamKeyVisibility', 'visible');
       } else {
         keyInput.type = 'password';
         eyeIcon.classList.remove('ti-eye-off');
         eyeIcon.classList.add('ti-eye');
+        localStorage.setItem('streamKeyVisibility', 'hidden');
+      }
+    }
+    
+    function applyEditStreamKeyVisibility() {
+      const keyInput = document.getElementById('editStreamKey');
+      const eyeIcon = document.getElementById('editStreamKeyToggle');
+      
+      if (keyInput && eyeIcon) {
+        const savedVisibility = localStorage.getItem('streamKeyVisibility');
+        
+        if (savedVisibility === 'visible') {
+          keyInput.type = 'text';
+          eyeIcon.classList.remove('ti-eye');
+          eyeIcon.classList.add('ti-eye-off');
+        } else {
+          keyInput.type = 'password';
+          eyeIcon.classList.remove('ti-eye-off');
+          eyeIcon.classList.add('ti-eye');
+        }
       }
     }
     document.addEventListener('DOMContentLoaded', function () {
