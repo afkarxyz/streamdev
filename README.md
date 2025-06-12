@@ -39,11 +39,11 @@ cd streamdev && node reset-password.js
             
 ![image](https://github.com/user-attachments/assets/2369562a-39a8-4c53-996b-e21387891e1e)
 
-**Gallery** ---60%
+**Gallery** ✅
 
 - [x] menambahkan info waktu upload
 - [x] refine video player
-- [ ] responsive view
+- [x] responsive view
 
 ![image](https://github.com/user-attachments/assets/907b979a-429d-44c2-bd41-63e372524a20)
 
