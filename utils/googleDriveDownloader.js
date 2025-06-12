@@ -19,16 +19,7 @@ class GDriveDownloader {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }    logProgress() {
-        if (this.totalBytes > 0) {
-            const percentage = (this.downloadedBytes / this.totalBytes * 100).toFixed(1);
-            console.log(`${percentage}% [${this.formatBytes(this.downloadedBytes)}/${this.formatBytes(this.totalBytes)}]`);
-        }
-    }isGoogleDrive(url) {
+    isGoogleDrive(url) {
         return url.includes('drive.google.com') || 
                url.includes('drive.usercontent.google.com') ||
                url.includes('/file/d/') ||
@@ -107,11 +98,17 @@ class GDriveDownloader {
         const fileId = this.extractFileId(url);
         if (!fileId) {
             throw new Error('Cannot extract File ID from Google Drive URL');
-        }
-
-        console.log(`File ID: ${fileId}`);        if (!outputPath) {
-            this.fileName = `gdrive_${fileId}.bin`;
-            outputPath = path.join('.', this.fileName);
+        }        
+        console.log(`File ID: ${fileId}`);        
+        if (!outputPath) {
+            const urlFilename = this.extractFilenameFromUrl(url);
+            if (urlFilename) {
+                this.fileName = urlFilename;
+                outputPath = path.join('.', urlFilename);
+            } else {
+                this.fileName = `gdrive_${fileId}.bin`;
+                outputPath = path.join('.', this.fileName);
+            }
         } else {
             this.fileName = path.basename(outputPath);
         }
@@ -145,18 +142,75 @@ class GDriveDownloader {
         return new Promise((resolve, reject) => {
             if (response.statusCode !== 200) {
                 return reject(new Error(`HTTP Error: ${response.statusCode} - ${response.statusMessage}`));
-            }            this.totalBytes = parseInt(response.headers['content-length'] || '0');
-            
+            }            
+            this.totalBytes = parseInt(response.headers['content-length'] || '0');
             const contentDisposition = response.headers['content-disposition'];
-            if (contentDisposition && contentDisposition.includes('filename=')) {
-                const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                if (match && match[1]) {
-                    const headerFileName = match[1].replace(/['"]/g, '');
-                    if (headerFileName && headerFileName !== 'unknown') {
-                        this.fileName = headerFileName;
-                        outputPath = path.join(path.dirname(outputPath), headerFileName);
+            let extractedFileName = null;
+            
+            if (contentDisposition) {
+                const patterns = [
+                    /filename\*=UTF-8''([^;\n]+)/i,  
+                    /filename\*=([^;\n]+)/i,         
+                    /filename="([^"]+)"/i,           
+                    /filename=([^;\n]+)/i            
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = contentDisposition.match(pattern);
+                    if (match && match[1]) {
+                        let filename = match[1].trim();
+                        
+                        try {
+                            filename = decodeURIComponent(filename);
+                        } catch (e) {
+                        }
+                        
+                        filename = filename.replace(/['"]/g, '').trim();
+                        
+                        if (filename && 
+                            filename !== 'unknown' && 
+                            filename !== 'download' &&
+                            filename.length > 0 &&
+                            filename.length < 255 &&
+                            !filename.match(/^[a-zA-Z0-9_-]{10,}$/)
+                        ) {
+                            extractedFileName = filename;
+                            break;
+                        }
                     }
                 }
+            }
+            
+            if (!extractedFileName) {
+                const contentType = response.headers['content-type'];
+                let extension = '.bin';
+                
+                if (contentType) {
+                    if (contentType.includes('video/mp4')) extension = '.mp4';
+                    else if (contentType.includes('video/avi')) extension = '.avi';
+                    else if (contentType.includes('video/quicktime')) extension = '.mov';
+                    else if (contentType.includes('video/webm')) extension = '.webm';
+                    else if (contentType.includes('video/x-msvideo')) extension = '.avi';
+                    else if (contentType.includes('video/')) extension = '.mp4';
+                    else if (contentType.includes('application/octet-stream')) {
+                        const currentExt = path.extname(this.fileName);
+                        if (currentExt) extension = currentExt;
+                        else extension = '.mp4';
+                    }
+                }
+                
+                if (this.fileName && !this.fileName.startsWith('gdrive_') && this.fileName !== `gdrive_${fileId}.bin`) {
+                    extractedFileName = this.fileName;
+                } else {
+                    const fileIdShort = fileId.substring(0, 8);
+                    extractedFileName = `gdrive_${fileIdShort}${extension}`;
+                }
+            }
+            
+            if (extractedFileName && extractedFileName !== path.basename(outputPath)) {
+                extractedFileName = extractedFileName.replace(/[<>:"/\\|?*]/g, '_').trim();
+                this.fileName = extractedFileName;
+                outputPath = path.join(path.dirname(outputPath), extractedFileName);
             }
 
             console.log(`File: ${this.fileName}`);
@@ -244,6 +298,30 @@ class GDriveDownloader {
             });
         });
     }
+
+    extractFilenameFromUrl(url) {
+        
+        try {
+            const urlObj = new URL(url);
+            
+            const searchParams = urlObj.searchParams;
+            if (searchParams.has('filename')) {
+                return decodeURIComponent(searchParams.get('filename'));
+            }
+            
+            const pathSegments = urlObj.pathname.split('/').filter(Boolean);
+            
+            for (const segment of pathSegments.reverse()) {
+                if (segment.includes('.') && !segment.match(/^[a-zA-Z0-9_-]{10,}$/) && segment !== 'view' && segment !== 'edit') {
+                    return decodeURIComponent(segment);
+                }
+            }
+            
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
 }
 
 async function getUrlInfo(url) {
@@ -276,23 +354,6 @@ async function downloadUrl(url, outputPath = null) {
         console.error('\nDownload failed:', error.message);
         throw error;
     }
-}
-
-async function main() {
-    const url = '';
-    
-    try {
-        const filePath = await downloadUrl(url);
-        console.log(`\nSuccess! File saved to: ${filePath}`);
-        
-    } catch (error) {
-        console.error('\nFailed:', error.message);
-        process.exit(1);
-    }
-}
-
-if (require.main === module) {
-    main();
 }
 
 module.exports = {

@@ -349,7 +349,6 @@ document.addEventListener('DOMContentLoaded', function () {
   platformOptions.forEach(option => {
     option.addEventListener('click', function () {
       const platformUrl = this.getAttribute('data-url');
-      const platformName = this.querySelector('span').textContent;
       rtmpInput.value = platformUrl;
       platformDropdown.classList.add('hidden');
       updatePlatformIcon(this.querySelector('i').className);
