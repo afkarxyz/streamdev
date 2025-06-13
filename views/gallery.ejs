@@ -520,8 +520,7 @@
       }      
       async function checkGDriveAPIKey() {
         showDirectDownloadInterface();
-      }
-
+      }      
       function showDirectDownloadInterface() {
         const modalContent = document.getElementById('gdriveModalBody');        
         modalContent.innerHTML = `
@@ -544,16 +543,14 @@
               <i class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
             </div>
             <p class="text-xs text-gray-500 mb-4">Make sure the file is shared with <strong>Anyone with the link</strong></p>
-            
             <button id="import-drive-direct-button" class="w-full bg-primary hover:bg-primary/90 text-white py-2.5 px-4 rounded-lg font-medium transition-colors flex items-center justify-center">
               <i class="ti ti-download mr-2"></i>
               <span>Import Video</span>
             </button>
           </div>
-        `;
-        
+        `;        
         document.getElementById('import-drive-direct-button').addEventListener('click', async function () {
-          const link = document.getElementById('gdrive-link-direct').value;
+          const link = document.getElementById('gdrive-link-direct').value;          
           if (!link) {
             showToast('error', 'Please enter a Google Drive link');
             return;
@@ -580,19 +577,19 @@
             const result = await response.json();
             if (result.success) {
               showImportProgressModal(result.jobId);
-              closeGDriveModal();            
+              closeGDriveModal();              
             } else {
               showToast('error', result.error || 'Failed to import video');
               this.disabled = false;
               this.innerHTML = `<i class="ti ti-download mr-2"></i><span>Import Video</span>`;
             }
           } catch (error) {
-            showToast('error', 'An error occurred while importing the video');
+            showToast('error', 'An error occurred while importing video');
             this.disabled = false;
             this.innerHTML = `<i class="ti ti-download mr-2"></i><span>Import Video</span>`;
           }
         });
-      }      
+      }
       function openVideoPreviewModal(title, videoSrc, details) {
         document.querySelector('#videoPreviewModal .video-title').textContent = title;
         const videoSource = document.getElementById('videoSource');
@@ -1871,14 +1868,13 @@
             showToast('error', 'Please upload a valid video file (MP4, AVI, MOV)');
           }
         }
-      });      
+      });        
       function showImportProgressModal(jobId) {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm';
         modal.id = 'import-progress-modal';        
         modal.innerHTML = `
-      <div class="bg-dark-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md mx-3 sm:mx-4 border border-gray-600/50 transform transition-all">
-        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-600/50">
+      <div class="bg-dark-800 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md mx-3 sm:mx-4 border border-gray-600/50 transform transition-all">        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-600/50">
           <h3 class="text-base sm:text-lg font-medium">Importing Video</h3>
           <button id="close-import-progress" class="rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors">
             <i class="ti ti-x text-sm sm:text-base"></i>
@@ -1890,35 +1886,170 @@
               <i id="progress-icon" class="ti ti-download text-blue-400 text-xl sm:text-2xl"></i>
             </div>
             <p id="progress-filename" class="text-xs sm:text-sm font-medium text-white mb-1" style="display: none;"></p>
-            <p id="progress-status" class="text-xs sm:text-sm text-gray-300 mb-2">Starting download...</p>
+            <p id="progress-status" class="text-xs sm:text-sm text-gray-300 mb-2">Starting...</p>
           </div>
           <div class="w-full bg-dark-700 rounded-full h-1.5 sm:h-2 mb-3 sm:mb-4">
             <div id="progress-bar" class="bg-blue-500 h-1.5 sm:h-2 rounded-full transition-all" style="width: 0%"></div>
+          </div>          
+          <div class="flex justify-center gap-2 mb-3">            
+            <button id="cancel-import-btn" class="w-auto bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+              <i class="ti ti-x mr-1"></i>
+              Cancel
+            </button>
           </div>
           <p class="text-xs text-gray-500 leading-relaxed">
             <i class="ti ti-info-circle mr-1"></i>
-            You can close this window and the import will continue in the background
+            You can close this window and import will continue in background
           </p>
         </div>
       </div>
-    `;
-        document.body.appendChild(modal);
+    `;        
+    document.body.appendChild(modal);
+        
+        localStorage.setItem('importJobId', jobId);
+        
         document.getElementById('close-import-progress').addEventListener('click', function () {
           document.getElementById('import-progress-modal').remove();
+          showMiniImportProgressModal(jobId);
         });
-        monitorImportProgress(jobId);
+        document.getElementById('cancel-import-btn').addEventListener('click', async function () {
+          try {
+            const response = await fetch(`/api/videos/import-cancel/${jobId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('input[name="_csrf"]')?.value
+              }
+            });
+              if (response.ok) {
+              showToast('warning', 'Import cancelled');
+              localStorage.removeItem('importJobId');
+              if (window.importStatusCache) {
+                delete window.importStatusCache[jobId];
+              }
+              document.getElementById('import-progress-modal').remove();
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } else {
+              showToast('error', 'Failed to cancel import');
+            }
+          } catch (error) {
+            showToast('error', 'Failed to cancel import');
+          }
+        });
+          monitorImportProgress(jobId);
       }
-      function monitorImportProgress(jobId) {
+      function showMiniImportProgressModal(jobId) {
+        if (document.getElementById('mini-import-progress')) return;
+          const mini = document.createElement('div');
+        mini.id = 'mini-import-progress';
+        mini.className = 'fixed bottom-20 md:bottom-4 right-4 z-50 bg-dark-800 border border-gray-600/50 rounded-lg p-3 shadow-lg flex items-center space-x-2 min-w-[250px] max-w-[calc(100vw-2rem)]';
+        mini.innerHTML = `
+          <div class="flex-1">
+            <div id="mini-progress-status" class="text-xs text-white">Starting...</div>
+            <div class="w-full bg-gray-700 rounded-full h-1 mt-1">
+              <div id="mini-progress-bar" class="bg-blue-500 h-1 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+          <button id="mini-cancel-btn" class="bg-red-600 hover:bg-red-700 text-white p-1 rounded text-xs">
+            <i class="ti ti-x"></i>
+          </button>
+        `;
+          document.body.appendChild(mini);
+        document.getElementById('mini-cancel-btn').addEventListener('click', async function () {
+          try {
+            const response = await fetch(`/api/videos/import-cancel/${jobId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('input[name="_csrf"]')?.value
+              }
+            });
+              if (response.ok) {
+              showToast('warning', 'Import cancelled');
+              localStorage.removeItem('importJobId');
+              if (window.importStatusCache) {
+                delete window.importStatusCache[jobId];
+              }
+              const intervalId = mini.getAttribute('data-interval-id');
+              if (intervalId) {
+                clearInterval(parseInt(intervalId));
+              }
+              mini.remove();
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } else {
+              showToast('error', 'Failed to cancel import');
+            }
+          } catch (error) {
+            showToast('error', 'Failed to cancel import');
+          }        
+        });
+        
+        const miniInterval = setInterval(async () => {
+          try {
+            const response = await fetch(`/api/videos/import-status/${jobId}`);
+            if (!response.ok) {
+              clearInterval(miniInterval);
+              localStorage.removeItem('importJobId');
+              mini.remove();
+              return;
+            }
+            
+            const data = await response.json();
+            if (!data.success) {
+              clearInterval(miniInterval);
+              localStorage.removeItem('importJobId');
+              mini.remove();
+              return;
+            }
+            
+            const status = data.status;
+            const miniProgressBar = document.getElementById('mini-progress-bar');
+            const miniProgressStatus = document.getElementById('mini-progress-status');
+            
+            if (miniProgressBar && miniProgressStatus) {
+              miniProgressBar.style.width = `${status.progress}%`;
+              miniProgressStatus.textContent = status.message;
+                if (status.status === 'complete') {
+                clearInterval(miniInterval);
+                localStorage.removeItem('importJobId');
+                showToast('success', 'Video imported successfully');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
+                mini.remove();
+              } else if (status.status === 'failed' || status.status === 'cancelled') {
+                clearInterval(miniInterval);
+                localStorage.removeItem('importJobId');
+                if (status.status === 'failed') {
+                  showToast('error', status.message || 'Import failed');
+                }
+                mini.remove();
+              }
+            }
+          } catch (error) {
+            console.error('Error monitoring mini import progress:', error);
+          }        
+        }, 1000);
+        
+        mini.setAttribute('data-interval-id', miniInterval);
+      }
+        function monitorImportProgress(jobId) {
         const progressInterval = setInterval(async () => {
           try {
             const response = await fetch(`/api/videos/import-status/${jobId}`);
             if (!response.ok) {
               clearInterval(progressInterval);
+              localStorage.removeItem('importJobId');
               return;
             }
             const data = await response.json();
             if (!data.success) {
               clearInterval(progressInterval);
+              localStorage.removeItem('importJobId');
               return;
             }            
             const status = data.status;
@@ -1943,17 +2074,21 @@
               } else if (status.status === 'complete') {
                 progressIcon.className = 'ti ti-check text-green-400 text-2xl';
                 progressBar.classList.remove('bg-blue-500');
-                progressBar.classList.add('bg-green-500');
+                progressBar.classList.add('bg-green-500');                
+                localStorage.removeItem('importJobId');
                 showToast('success', 'Video imported successfully');
                 setTimeout(() => {
                   window.location.reload();
                 }, 2000);
                 clearInterval(progressInterval);
-              } else if (status.status === 'failed') {
-                progressIcon.className = 'ti ti-alert-triangle text-red-400 text-2xl';
+              } else if (status.status === 'failed' || status.status === 'cancelled') {
+                progressIcon.className = status.status === 'failed' ? 'ti ti-alert-triangle text-red-400 text-2xl' : 'ti ti-x text-yellow-400 text-2xl';
                 progressBar.classList.remove('bg-blue-500');
-                progressBar.classList.add('bg-red-500');
-                showToast('error', status.message || 'Failed to import video');
+                progressBar.classList.add(status.status === 'failed' ? 'bg-red-500' : 'bg-yellow-500');                
+                localStorage.removeItem('importJobId');
+                if (status.status === 'failed') {
+                  showToast('error', status.message || 'Import failed');
+                }
                 clearInterval(progressInterval);
               }
             }
@@ -1961,8 +2096,29 @@
             console.error('Error monitoring import progress:', error);
           }
         }, 1000);
-      }        
-      document.addEventListener('DOMContentLoaded', function () {        
+      }      
+      document.addEventListener('DOMContentLoaded', function () {
+        const savedJobId = localStorage.getItem('importJobId');        
+        if (savedJobId) {
+          fetch(`/api/videos/import-status/${savedJobId}`)
+            .then(response => {
+              if (response.ok) {
+                return response.json();
+              }
+              throw new Error('Job not found');
+            })            
+            .then(data => {
+              if (data.success && ['downloading', 'processing'].includes(data.status.status)) {
+                showMiniImportProgressModal(savedJobId);
+              } else {
+                localStorage.removeItem('importJobId');
+              }
+            })
+            .catch(() => {
+              localStorage.removeItem('importJobId');
+            });
+        }
+        
         const searchInput = document.querySelector('input[placeholder="Search videos..."]');
         const sortToggleBtn = document.getElementById('sort-toggle-btn');
         const sortIcon = document.getElementById('sort-icon');

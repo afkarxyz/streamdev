@@ -15,7 +15,7 @@ const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const User = require('./models/User');
-const { db, checkIfUsersExist } = require('./db/database');
+const { checkIfUsersExist } = require('./db/database');
 const systemMonitor = require('./services/systemMonitor');
 const { uploadVideo } = require('./middleware/uploadMiddleware');
 const { ensureDirectories, paths } = require('./utils/storage');
@@ -209,20 +209,6 @@ const videoUpload = multer({
     cb(null, true);
   }
 });
-const csrfProtection = function (req, res, next) {
-  if ((req.path === '/login' && req.method === 'POST') ||
-    (req.path === '/setup-account' && req.method === 'POST')) {
-    return next();
-  }
-  const token = req.body._csrf || req.query._csrf || req.headers['x-csrf-token'];
-  if (!token || !tokens.verify(req.session.csrfSecret, token)) {
-    return res.status(403).render('error', {
-      title: 'Error',
-      error: 'CSRF validation failed. Please try again.'
-    });
-  }
-  next();
-};
 const isAuthenticated = (req, res, next) => {
   if (req.session.userId) {
     return next();
@@ -708,7 +694,7 @@ app.get('/api/analytics/video/:videoId', isAuthenticated, async (req, res) => {
   }
 });
 
-const { addVideoToAnalytics, getUserAnalyticsVideos, removeVideoFromAnalytics, updateVideoAnalyticsData, getVideoAnalytics } = require('./db/database');
+const { addVideoToAnalytics, getUserAnalyticsVideos, removeVideoFromAnalytics, updateVideoAnalyticsData } = require('./db/database');
 
 app.post('/api/analytics/add-video-db', isAuthenticated, [
   body('url').notEmpty().withMessage('URL is required'),
@@ -1080,7 +1066,6 @@ app.post('/api/videos/upload', isAuthenticated, videoUpload.single('video'), asy
         }
         const thumbnailFilename = `thumb-${path.parse(req.file.filename).name}.jpg`;
         const thumbnailPath = `/uploads/thumbnails/${thumbnailFilename}`;
-        const fullThumbnailPath = path.join(__dirname, 'public', thumbnailPath);
         ffmpeg(fullFilePath)
           .screenshots({
             timestamps: ['10%'],
@@ -1265,6 +1250,35 @@ app.get('/api/videos/import-status/:jobId', isAuthenticated, async (req, res) =>
     status: importJobs[jobId]
   });
 });
+
+app.post('/api/videos/import-cancel/:jobId', isAuthenticated, async (req, res) => {
+  const jobId = req.params.jobId;
+  
+  try {
+    if (!importJobs[jobId]) {
+      return res.status(404).json({ success: false, error: 'Import job not found' });
+    }
+    
+    importJobs[jobId] = {
+      ...importJobs[jobId],
+      status: 'cancelled',
+      message: 'Import cancelled by user'
+    };
+    
+    setTimeout(() => {
+      delete importJobs[jobId];
+    }, 30000);
+    
+    return res.json({
+      success: true,
+      message: 'Import cancelled successfully'
+    });
+  } catch (error) {
+    console.error('Error cancelling import:', error);
+    res.status(500).json({ success: false, error: 'Failed to cancel import' });
+  }
+});
+
 const importJobs = {};
 
 async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
@@ -1304,6 +1318,10 @@ async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
     const outputPath = path.join(uploadsDir, tempFileName);
     
     const progressCallback = (progress) => {
+      if (importJobs[jobId] && importJobs[jobId].status === 'cancelled') {
+        throw new Error('Import dibatalkan oleh pengguna');
+      }
+      
       const downloadProgress = Math.min(80, Math.round(progress.percentage * 0.8)); 
       const filename = progress.fileName || 'Unknown file';
       importJobs[jobId] = {
@@ -1315,6 +1333,13 @@ async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
     };
     
     const localFilePath = await downloader.downloadFile(driveUrl, outputPath, progressCallback);
+    
+    if (importJobs[jobId] && importJobs[jobId].status === 'cancelled') {
+      if (fs.existsSync(localFilePath)) {
+        fs.unlinkSync(localFilePath);
+      }
+      return;
+    }
     
     const stats = fs.statSync(localFilePath);
     const originalFilename = downloader.fileName || `gdrive_${fileId}.mp4`;
@@ -1335,6 +1360,13 @@ async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
       progress: 90,
       message: 'Processing video...'
     };
+    
+    if (importJobs[jobId] && importJobs[jobId].status === 'cancelled') {
+      if (fs.existsSync(finalPath)) {
+        fs.unlinkSync(finalPath);
+      }
+      return;
+    }
     
     const videoInfo = await getVideoInfo(result.localFilePath);
     const resolution = videoInfo.resolution || '1280x720';
@@ -1410,7 +1442,7 @@ app.get('/api/stream/videos', isAuthenticated, async (req, res) => {
   }
 });
 const Stream = require('./models/Stream');
-const { title } = require('process');
+require('process');
 app.get('/api/streams', isAuthenticated, async (req, res) => {
   try {
     const filter = req.query.filter;
