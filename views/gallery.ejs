@@ -541,14 +541,12 @@
                 placeholder="https://drive.google.com/file/d/..."
               >
               <i class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>            
-            <p class="text-xs text-gray-500 mb-4">Make sure the file is shared with <strong>Anyone with the link</strong></p>
-            <div class="flex justify-center">
-              <button id="import-drive-direct-button" class="bg-primary hover:bg-primary/90 text-white py-2.5 px-4 rounded-lg font-medium transition-colors flex items-center justify-center">
-                <i class="ti ti-download mr-2"></i>
-                <span>Import Video</span>
-              </button>
             </div>
+            <p class="text-xs text-gray-500 mb-4">Make sure the file is shared with <strong>Anyone with the link</strong></p>
+            <button id="import-drive-direct-button" class="w-full bg-primary hover:bg-primary/90 text-white py-2.5 px-4 rounded-lg font-medium transition-colors flex items-center justify-center">
+              <i class="ti ti-download mr-2"></i>
+              <span>Import Video</span>
+            </button>
           </div>
         `;        
         document.getElementById('import-drive-direct-button').addEventListener('click', async function () {
@@ -556,9 +554,16 @@
           if (!link) {
             showToast('error', 'Please enter a Google Drive link');
             return;
-          }            
+          }
+          
           this.disabled = true;
-          this.innerHTML = `Processing...`;
+          this.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          `;
           
           try {
             const response = await fetch('/api/videos/import-drive-direct', {
