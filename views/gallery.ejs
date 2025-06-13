@@ -1,20 +1,36 @@
 <% layout('layout') -%>
-  <% function formatFileSize(bytes) { if (bytes < 1024) return bytes + ' B' ; else if (bytes < 1048576) return (bytes /
-    1024).toFixed(1) + ' KB' ; else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB' ; else return
-    (bytes / 1073741824).toFixed(1) + ' GB' ; } function formatDate(dateString) { const date=new Date(dateString); const
-    options={ day: 'numeric' , month: 'short' , year: 'numeric' }; return date.toLocaleDateString('en-US', options) + ', ' + date.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        }); }
-    function formatDuration(seconds) { if (!seconds) return '00:00' ; const minutes=Math.floor(seconds / 60); const
-    remainingSeconds=Math.floor(seconds % 60); return `${minutes.toString().padStart(2, '0'
-    )}:${remainingSeconds.toString().padStart(2, '0' )}`; } %>    
+  <% function formatFileSize(bytes) {
+    if (bytes < 1024) {
+      return bytes + ' B';
+    } else if (bytes < 1048576) {
+      return (bytes / 1024).toFixed(1) + ' KB';
+    } else if (bytes < 1073741824) {
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    } else {
+      return (bytes / 1073741824).toFixed(1) + ' GB';
+    }
+  } function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) + ', ' + date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } function formatDuration(seconds) {
+    if (!seconds) return '00:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  } %>
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
       <div>
         <h2 class="text-2xl font-bold">Video Gallery<% if (videos && videos.length > 0) { %> <span class="text-gray-400 font-normal">(<%= videos.length %>)</span><% } %></h2>
         <p class="text-gray-400 text-sm mt-1">Manage your videos for streaming</p>
-      </div>      
+      </div>
       <div class="flex gap-3">
         <button onclick="openUploadModal()"
           class="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium">
@@ -25,13 +41,13 @@
           class="flex-1 flex items-center justify-center gap-2 bg-[#4285F4]/20 border border-[#4285F4]/50 hover:bg-[#4285F4]/30 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium">
           <i class="ti ti-brand-google-drive text-[#4285F4]"></i>
           <span>Import</span>
-        </button>        
+        </button>
         <button id="clear-all-videos" class="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 h-10 rounded-lg transition-colors text-sm font-medium<% if (!videos || videos.length === 0) { %> hidden<% } %>">
           <i class="ti ti-trash"></i>
           <span>Clear</span>
         </button>
       </div>
-    </div>    
+    </div>
     <div class="bg-gray-800 rounded-lg p-4 mb-6">
       <div class="flex flex-row items-center justify-between gap-4">
         <div class="relative flex-1 max-w-md">
@@ -463,7 +479,7 @@
         document.getElementById('uploadDropzone').classList.remove('hidden');
         document.getElementById('uploadProgress').classList.add('hidden');
         document.getElementById('uploadButton').disabled = true;
-        document.getElementById('uploadProgressBar').style.width = '0%';
+        document.getElementById('overallProgressBar').style.width = '0%';
         const dropzone = document.getElementById('uploadDropzone');
         dropzone.setAttribute('data-state', 'idle');
         dropzone.classList.remove('border-primary', 'bg-primary/5');
@@ -811,7 +827,7 @@
         const desktopPlayPause = document.getElementById('desktop-play-pause');
         const desktopVolumeBtn = document.getElementById('desktop-volume-btn');
         const progressBar = document.getElementById('progress-bar');
-        const progressFill = document.getElementById('progress-fill');
+        const progressFill = document.getElementById('volume-fill');
         const progressThumb = document.getElementById('progress-thumb');
         const volumeBar = document.getElementById('volume-bar');
         const volumeFill = document.getElementById('volume-fill');
@@ -1481,7 +1497,7 @@
             
             try {
               statusElement.textContent = 'Uploading...';
-              statusElement.className = 'text-xs text-blue-400';
+              statusElement.classList.add('text-blue-400');
               
               const result = await uploadSingleFile(file, (progress) => {
                 progressElement.textContent = `${progress}%`;
@@ -1491,19 +1507,22 @@
               if (result.success) {
                 completedFiles++;
                 statusElement.textContent = 'Completed';
-                statusElement.className = 'text-xs text-green-400';
-                progressBarElement.className = 'bg-green-500 h-1.5 rounded-full transition-all duration-300';
+                statusElement.classList.add('text-green-400');
+                progressBarElement.classList.remove('bg-blue-500');
+                progressBarElement.classList.add('bg-green-500');
               } else {
                 failedFiles++;
                 statusElement.textContent = `Failed: ${result.error}`;
-                statusElement.className = 'text-xs text-red-400';
-                progressBarElement.className = 'bg-red-500 h-1.5 rounded-full transition-all duration-300';
+                statusElement.classList.add('text-red-400');
+                progressBarElement.classList.remove('bg-blue-500');
+                progressBarElement.classList.add('bg-red-500');
               }
             } catch (error) {
               failedFiles++;
               statusElement.textContent = `Error: ${error.message}`;
-              statusElement.className = 'text-xs text-red-400';
-              progressBarElement.className = 'bg-red-500 h-1.5 rounded-full transition-all duration-300';
+              statusElement.classList.add('text-red-400');
+              progressBarElement.classList.remove('bg-blue-500');
+              progressBarElement.classList.add('bg-red-500');
             }
             
             const processedFiles = completedFiles + failedFiles;
@@ -2014,10 +2033,27 @@
           }
           
           let file_size = 0;
-          if (fileSizeText && fileSizeText.includes('MB')) {
-            const sizeMatch = fileSizeText.match(/([\d.]+)\s*MB/);
-            if (sizeMatch) {
-              file_size = parseFloat(sizeMatch[1]) * 1024 * 1024;
+          if (fileSizeText) {
+            if (fileSizeText.includes('GB')) {
+              const sizeMatch = fileSizeText.match(/([\d.]+)\s*GB/);
+              if (sizeMatch) {
+                file_size = parseFloat(sizeMatch[1]) * 1024 * 1024 * 1024;
+              }
+            } else if (fileSizeText.includes('MB')) {
+              const sizeMatch = fileSizeText.match(/([\d.]+)\s*MB/);
+              if (sizeMatch) {
+                file_size = parseFloat(sizeMatch[1]) * 1024 * 1024;
+              }
+            } else if (fileSizeText.includes('KB')) {
+              const sizeMatch = fileSizeText.match(/([\d.]+)\s*KB/);
+              if (sizeMatch) {
+                file_size = parseFloat(sizeMatch[1]) * 1024;
+              }
+            } else if (fileSizeText.includes('B')) {
+              const sizeMatch = fileSizeText.match(/([\d.]+)\s*B/);
+              if (sizeMatch) {
+                file_size = parseFloat(sizeMatch[1]);
+              }
             }
           }          
           return {
