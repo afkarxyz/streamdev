@@ -1886,7 +1886,7 @@
         <div class="p-4 sm:p-6">
           <div class="text-center mb-3 sm:mb-4">
             <div class="w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4 rounded-full bg-blue-500/10 mx-auto flex items-center justify-center">
-              <i id="progress-icon" class="ti ti-download text-blue-400 text-xl sm:text-2xl"></i>
+              <i id="progress-icon" class="ti ti-download text-blue-400 text-xl sm:text-2xl" style="line-height: 1; display: inline-flex; align-items: center; justify-content: center;"></i>
             </div>
             <p id="progress-filename" class="text-xs sm:text-sm font-medium text-white mb-1" style="display: none;"></p>
             <p id="progress-status" class="text-xs sm:text-sm text-gray-300 mb-2">Starting...</p>
@@ -2072,9 +2072,25 @@
               
               if (status.status === 'downloading') {
                 progressIcon.className = 'ti ti-download text-blue-400 text-2xl';
+                progressIcon.style.transformOrigin = 'center center';
+                progressIcon.style.lineHeight = '1';
+                progressIcon.style.display = 'inline-flex';
+                progressIcon.style.alignItems = 'center';
+                progressIcon.style.justifyContent = 'center';
               } else if (status.status === 'processing') {
                 progressIcon.className = 'ti ti-settings text-blue-400 text-2xl animate-spin';
+                progressIcon.style.transformOrigin = 'center center';
+                progressIcon.style.lineHeight = '1';
+                progressIcon.style.display = 'inline-flex';
+                progressIcon.style.alignItems = 'center';
+                progressIcon.style.justifyContent = 'center';
               } else if (status.status === 'complete') {
+                progressIcon.className = 'ti ti-check text-green-400 text-2xl';
+                progressIcon.style.transformOrigin = 'center center';
+                progressIcon.style.lineHeight = '1';
+                progressIcon.style.display = 'inline-flex';
+                progressIcon.style.alignItems = 'center';
+                progressIcon.style.justifyContent = 'center';
                 progressIcon.className = 'ti ti-check text-green-400 text-2xl';
                 progressBar.classList.remove('bg-blue-500');
                 progressBar.classList.add('bg-green-500');                
@@ -2086,6 +2102,11 @@
                 clearInterval(progressInterval);
               } else if (status.status === 'failed' || status.status === 'cancelled') {
                 progressIcon.className = status.status === 'failed' ? 'ti ti-alert-triangle text-red-400 text-2xl' : 'ti ti-x text-yellow-400 text-2xl';
+                progressIcon.style.transformOrigin = 'center center';
+                progressIcon.style.lineHeight = '1';
+                progressIcon.style.display = 'inline-flex';
+                progressIcon.style.alignItems = 'center';
+                progressIcon.style.justifyContent = 'center';
                 progressBar.classList.remove('bg-blue-500');
                 progressBar.classList.add(status.status === 'failed' ? 'bg-red-500' : 'bg-yellow-500');                
                 localStorage.removeItem('importJobId');
