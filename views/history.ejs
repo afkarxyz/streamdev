@@ -463,8 +463,9 @@
         });        
         
         const visibleRows = document.querySelectorAll('#history-table-body tr[data-id]:not([style*="display: none"]), .md\\:hidden div[data-id]:not([style*="display: none"])');
+        const allRows = document.querySelectorAll('#history-table-body tr[data-id], .md\\:hidden div[data-id]');
         
-        if (visibleRows.length === 0 && !document.getElementById('empty-search-results-desktop') && !document.getElementById('empty-search-results-mobile')) {
+        if (visibleRows.length === 0 && allRows.length > 0 && !document.getElementById('empty-search-results-desktop') && !document.getElementById('empty-search-results-mobile')) {
           const tableBody = document.getElementById('history-table-body');
           const mobileContainer = document.querySelector('.md\\:hidden.p-4');
           
