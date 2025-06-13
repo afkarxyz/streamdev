@@ -15,16 +15,3 @@ curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/ins
 ```bash
 cd streamdev && node reset-password.js
 ```
-
-## TODO
-
-**Dashboard**
-- [ ] fix waktu tidak sinkron saat edit schedule stream
-- [ ] fix stream yang tiba-tiba start 1 menit sebelum waktu yang dijadwalkan, misal jadwal 16:30, ternyata start live di 16:29
-
-**Gallery**
-- [ ] fungsi cancel import dari google drive
-- [ ] minimize mode, overlay progress import
-      
-**Global**
-- [ ] hapus unused code
