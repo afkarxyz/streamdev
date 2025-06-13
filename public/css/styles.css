@@ -216,15 +216,13 @@ body {
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .spin-animation {
   animation: spin 1s linear infinite;
-  transform-origin: center center;
+  transform-origin: 50% 50%;
+  display: inline-block;
+  will-change: transform;
 }
