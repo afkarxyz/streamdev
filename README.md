@@ -15,7 +15,7 @@ curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/ins
 ```bash
 cd streamdev && node reset-password.js
 ```
-## 🚀 Changelog
+## Changelog
 
 ### 🖥️ Dashboard
 
