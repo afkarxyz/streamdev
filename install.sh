@@ -54,5 +54,5 @@ echo
 echo "📋 Langkah selanjutnya:"
 echo "1. Buka URL di browser"
 echo "2. Buat username & password"
-echo "3. Setelah membuat akun, logout kemudian login kembali untuk sinkronisasi database"
+echo "3. Setelah membuat akun, lakukan Sign Out kemudian login kembali untuk sinkronisasi database"
 echo "================================"
