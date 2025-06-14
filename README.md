@@ -26,16 +26,16 @@ cd streamdev && node reset-password.js
   * Mengubah posisi fitur "Loop Video".
   * "Advanced Settings" sekarang menggunakan toggle. Akan muncul peringatan ketika diklik.
   * Menambahkan informasi zona waktu, lokasi, dan IP.
-* Menambahkan tab "Stream".
-* Menambahkan fungsi timer pada fitur scheduled stream.
+* Menambahkan tab pada "Streaming Status".
+* Menambahkan fungsi timer pada scheduled stream.
 * Mengubah posisi status stream dan memperjelas warnanya pada tampilan mobile.
 
 ### 📁 Gallery
 
 * Menambahkan informasi total video.
-* Menambahkan tombol "Clear" untuk menghapus beberapa video sekaligus.
+* Menambahkan tombol "Clear" untuk menghapus semua video sekaligus.
 * Menambahkan fungsi batch upload untuk mengunggah banyak file sekaligus.
-* Menambahkan overlay progress bar saat modal import Google Drive ditutup.
+* Menambahkan overlay progress bar saat import Google Drive ditutup.
 * Menampilkan waktu upload/import file.
 * Mengubah sort menjadi toggle.
 * Memperbaiki bug informasi ukuran file di atas 1 GB dan paginasi yang sebelumnya kurang akurat.
@@ -43,7 +43,7 @@ cd streamdev && node reset-password.js
 ### 📜 History
 
 * Menambahkan informasi total video.
-* Menambahkan tombol "Clear" untuk menghapus beberapa video sekaligus.
+* Menambahkan tombol "Clear" untuk menghapus semua video sekaligus.
 * Menambahkan ikon filter berdasarkan platform.
 * Menambahkan tombol untuk menggunakan ulang riwayat stream (reuse stream history).
 
@@ -56,7 +56,7 @@ cd streamdev && node reset-password.js
 
 * Menghapus dependensi yang tidak terpakai, membersihkan kode yang tidak digunakan, dan memperbarui dependensi.
 * Menambahkan halaman baru "Analytics" untuk memantau performa video tanpa perlu membuka YouTube Studio.
-* Menambahkan halaman info perubahan update yang ditampilkan di atas foto profil.
+* Menambahkan halaman info perubahan update yang terletak di atas foto profil.
 * Ikon Streamflow sekarang dapat diklik.
 * Semua pesan alert kini menggunakan custom modal yang seragam.
-* Memperbaiki bug minor.
+* Memperbaiki bug.
