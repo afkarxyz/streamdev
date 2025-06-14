@@ -1,4 +1,4 @@
-## 🚀 Quick Install [StreamFlow](https://github.com/bangtutorial/streamflow)
+## ⚡ Quick Install [StreamFlow](https://github.com/bangtutorial/streamflow)
 
 ### Installation
 ```bash
