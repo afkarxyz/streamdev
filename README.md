@@ -15,6 +15,12 @@ curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/ins
 ```bash
 cd streamdev && node reset-password.js
 ```
+
+### Extract Logs
+```bash
+cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
+```
+
 ## Changelog: 15-06-2025
 
 ### 🖥️ Dashboard
