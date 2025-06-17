@@ -1111,8 +1111,6 @@
     }
     
     function updateSystemStats() {
-      if (window.isRefreshing) return;
-      
       fetch('/api/system-stats')
         .then(response => response.json())
         .then(data => {
@@ -1170,10 +1168,7 @@
     });
     
     updateSystemStats();
-    if (window.systemStatsInterval) {
-      clearInterval(window.systemStatsInterval);
-    }
-    window.systemStatsInterval = setInterval(updateSystemStats, 5000);
+    setInterval(updateSystemStats, 5000);
     document.getElementById('newStreamForm').addEventListener('submit', function (e) {
       e.preventDefault();      
       const videoId = document.getElementById('selectedVideoId').value;
@@ -1949,73 +1944,27 @@
             });
         }
       });
-    }    
-    window.isRefreshing = false;
-    window.refreshLocked = false;
-    window.countdownInterval = null;
-    window.liveTimerInterval = null;
-    window.serverTimeInterval = null;
-    window.systemStatsInterval = null;
-    
-    function performPageRefresh(reason = 'unknown') {
-      if (window.isRefreshing || window.refreshLocked || document.hidden) {
-        console.log('Refresh blocked:', { isRefreshing: window.isRefreshing, refreshLocked: window.refreshLocked, hidden: document.hidden });
-        return false;
-      }
-      
-      window.isRefreshing = true;
-      window.refreshLocked = true;
-      
-      console.log('Initiating page refresh due to:', reason);
-      
-      clearInterval(window.countdownInterval);
-      clearInterval(window.liveTimerInterval); 
-      clearInterval(window.serverTimeInterval);
-      clearInterval(window.systemStatsInterval);
-      
-      window.countdownInterval = null;
-      window.liveTimerInterval = null;
-      window.serverTimeInterval = null;
-      window.systemStatsInterval = null;
-      
-      document.querySelectorAll('[data-schedule-time]').forEach(el => {
-        el.innerHTML = '<span class="text-blue-400">Refreshing...</span>';
-      });
-      
-      window.location.href = window.location.href;
-      return true;
-    }
-    
-    function startCountdowns() {
-      if (window.countdownInterval || window.refreshLocked) {
-        return;
-      }
-      
-      let countdownExpired = false;
+    }    function startCountdowns() {
+      let hasCountdownExpired = false;
       
       const updateTimers = () => {
-        if (window.isRefreshing || window.refreshLocked) {
-          return;
-        }
+        let anyCountdownExpired = false;
         
-        let hasExpiredCountdown = false;
-        
-        document.querySelectorAll('[data-schedule-time]:not(.countdown-timer)').forEach(el => {
+        document.querySelectorAll('[data-schedule-time]').forEach(el => {
+          if (el.classList.contains('countdown-timer')) return;
+          
           const scheduleTime = new Date(el.dataset.scheduleTime);
           const now = new Date();
           const diff = scheduleTime - now;
-          
           if (diff <= 0) {
             el.textContent = 'Starting soon...';
-            hasExpiredCountdown = true;
+            anyCountdownExpired = true;
             return;
           }
-          
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-          
           let timeText = '';
           if (days > 0) timeText = `${days}d ${hours}h ${minutes}m`;
           else if (hours > 0) timeText = `${hours}h ${minutes}m ${seconds}s`;
@@ -2029,8 +1978,8 @@
           const diff = scheduleTime - now;
           
           if (diff <= 0) {
-            el.innerHTML = '<span class="text-green-400">Starting Soon!</span>';
-            hasExpiredCountdown = true;
+            el.innerHTML = '<span class="text-green-400 animate-pulse">Starting Soon!</span>';
+            anyCountdownExpired = true;
             return;
           }
           
@@ -2056,19 +2005,20 @@
           el.innerHTML = timeHTML;
         });
         
-        if (hasExpiredCountdown && !countdownExpired) {
-          countdownExpired = true;
-          performPageRefresh('countdown_expired');
+        if (anyCountdownExpired && !hasCountdownExpired) {
+          hasCountdownExpired = true;
+          console.log('Countdown expired, refreshing page in 3 seconds...');
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
         }
       };
       
       updateTimers();
-      window.countdownInterval = setInterval(updateTimers, 1000);
+      setInterval(updateTimers, 1000);
     }
     document.addEventListener('DOMContentLoaded', function () {
-      setTimeout(() => {
-        startCountdowns();
-      }, 500);
+      startCountdowns();
     });
     let editSelectedVideoData = null;
     let currentEditOrientation = 'horizontal';
@@ -2551,15 +2501,7 @@
       }
     }
     function startLiveTimers() {
-      if (window.liveTimerInterval || window.refreshLocked) {
-        return;
-      }
-      
-      window.liveTimerInterval = setInterval(() => {
-        if (window.isRefreshing || window.refreshLocked) {
-          return;
-        }
-        
+      setInterval(() => {
         document.querySelectorAll('.live-duration').forEach(el => {
           const startTime = new Date(el.dataset.startTime);
           const now = new Date();
@@ -2571,13 +2513,9 @@
         });
       }, 1000);
     }    function updateServerTime() {
-      if (window.isRefreshing || window.refreshLocked) return;
-      
       fetch('/api/server-time')
         .then(response => response.json())
         .then(data => {
-          if (window.isRefreshing || window.refreshLocked) return;
-          
           if (data.formattedTime) {
             const createModalDisplay = document.getElementById('serverTimeDisplay');
             if (createModalDisplay) {
@@ -2590,9 +2528,7 @@
           }
         })
         .catch(error => {
-          if (!window.isRefreshing && !window.refreshLocked) {
-            console.error('Error fetching server time:', error);
-          }
+          console.error('Error fetching server time:', error);
         });    
       }    
       function updateLocationInfo() {
@@ -2653,14 +2589,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       updateServerTime();
       updateLocationInfo();
-      if (window.serverTimeInterval) {
-        clearInterval(window.serverTimeInterval);
-        window.serverTimeInterval = null;
-      }
-      window.serverTimeInterval = setInterval(() => {
-        if (window.isRefreshing || window.refreshLocked) return;
-        updateServerTime();
-      }, 1000);
+      setInterval(updateServerTime, 1000);
     });
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.querySelector('input[placeholder="Search streams..."]');
