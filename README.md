@@ -19,10 +19,11 @@ cd streamdev && node reset-password.js
 ```bash
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
-## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/9c78715f0df5135481166e131ff7737d36133294)
+## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/60e8b016691dadf733d19d5c4fd662e053715248)
 
 * Menambahkan Logs.
 * Tampilan lebih minimalis.
+* Mengganti `sqlite3` ke `better-sqlite3` yang lebih cepat.
   
 ## 🔖 Changelog: [15-06-2025](https://github.com/afkarxyz/streamdev/tree/f8e9fdcd88264a5d1ca02f508d5d266a5e14fd20)
 
