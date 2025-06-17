@@ -23,6 +23,7 @@ cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 
 * Menambahkan Logs.
 * Tampilan lebih minimalis.
+* Mengganti `fluent-ffmpeg` ke `@ffprobe-installer/ffprobe`
   
 ## 🔖 Changelog: [15-06-2025](https://github.com/afkarxyz/streamdev/tree/f8e9fdcd88264a5d1ca02f508d5d266a5e14fd20)
 
