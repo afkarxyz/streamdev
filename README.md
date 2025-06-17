@@ -19,13 +19,8 @@ cd streamdev && node reset-password.js
 ```bash
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
-## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/590b8f1ed3be372956a427c46bf3aedb57ce2a0c)
 
-* Menambahkan Logs.
-* Tampilan lebih minimalis.
-* Memperbaiki bug broken thumbnail dari import Google Drive.
-  
-## 🔖 Changelog: [15-06-2025](https://github.com/afkarxyz/streamdev/tree/f8e9fdcd88264a5d1ca02f508d5d266a5e14fd20)
+## 🔖 Changelog: 17-06-2025
 
 🖥️ Dashboard
 
@@ -65,7 +60,8 @@ cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 
 * Menghapus dependensi yang tidak terpakai, membersihkan kode yang tidak digunakan, dan memperbarui dependensi.
 * Menambahkan halaman baru "Analytics" untuk memantau performa video tanpa perlu membuka YouTube Studio.
+* Menambahkan halaman baru "Logs" untuk memantau system log.
 * Menambahkan halaman info perubahan update yang terletak di atas foto profil.
 * Ikon Streamflow sekarang dapat diklik.
 * Semua pesan alert kini menggunakan custom modal yang seragam.
-* Memperbaiki bug.
+* Memperbaiki beberapa bug.
