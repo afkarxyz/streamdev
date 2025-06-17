@@ -19,11 +19,13 @@ cd streamdev && node reset-password.js
 ```bash
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
-## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/fcb8a6ceb56d6391d9a0d023f9fe5959779a474f)
+## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/60c9a8bd879aa972ca8b72984c8eeb3f8fcaf157)
 
 * Menambahkan Logs.
 * Tampilan lebih minimalis.
 * Mengganti `fluent-ffmpeg` ke `@ffprobe-installer/ffprobe`
+* Mengganti `sqlite3` ke `better-sqlite3`
+* Memperbaiki bug broken thumbnail dari import Google Drive.
   
 ## 🔖 Changelog: [15-06-2025](https://github.com/afkarxyz/streamdev/tree/f8e9fdcd88264a5d1ca02f508d5d266a5e14fd20)
 
