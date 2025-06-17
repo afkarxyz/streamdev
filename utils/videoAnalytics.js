@@ -21,7 +21,8 @@ class VideoAnalytics {
             }
         }
         return null;
-    }    async getVideoLiveStats(videoId) {
+    }    
+    async getVideoLiveStats(videoId) {
         try {
             const response = await axios.get(`https://api.subscribercounter.nl/api/youtube/videos/stats/${videoId}`, {
                 headers: {
@@ -81,7 +82,8 @@ class VideoAnalytics {
                 error: error.message
             };
         }
-    }    async getVideoInfo(videoId) {
+    }    
+    async getVideoInfo(videoId) {
         try {
             const response = await axios.get(`https://api.subscribercounter.nl/api/youtube/videos/info/${videoId}`, {
                 headers: {
@@ -117,7 +119,8 @@ class VideoAnalytics {
                 error: error.message
             };
         }
-    }    async getVideoAnalytics(videoId) {
+    }    
+    async getVideoAnalytics(videoId) {
         try {
             const [videoInfo, liveStats, videoStats] = await Promise.all([
                 this.getVideoInfo(videoId),
@@ -193,7 +196,8 @@ class VideoAnalytics {
                 error: error.message
             };
         }
-    }    formatNumber(num) {
+    }    
+    formatNumber(num) {
         if (num === null || num === undefined) return 'N/A';
         if (typeof num === 'string') {
             return num;

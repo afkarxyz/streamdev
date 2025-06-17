@@ -107,6 +107,11 @@
           <i class="ti ti-chart-line text-xl"></i>
           <span class="text-xs mt-1">Analytics</span>
           <span class="sidebar-tooltip group-hover:scale-100">Video Analytics</span>
+        </a>
+        <a href="/logs" class="sidebar-icon group <%= active === 'logs' ? 'bg-primary' : '' %>">
+          <i class="ti ti-file-text text-xl"></i>
+          <span class="text-xs mt-1">Logs</span>
+          <span class="sidebar-tooltip group-hover:scale-100">System Logs</span>
         </a>      
       </div>
       <div class="mt-auto">        
@@ -240,6 +245,10 @@
           <i class="ti ti-settings mr-2"></i>
           <span>Settings</span>
         </a>
+        <a href="/logs" class="flex items-center py-2 text-gray-300 hover:text-white text-sm">
+          <i class="ti ti-file-text mr-2"></i>
+          <span>Logs</span>
+        </a>
         <a href="/logout" class="flex items-center py-2 text-red-400 hover:text-red-300 text-sm">
           <i class="ti ti-logout mr-2"></i>
           <span>Sign Out</span>
@@ -354,6 +363,11 @@
   }
   .bottom-nav-item span {
     font-size: 11px;
+  }
+  @media (max-width: 1023px) {
+    .bottom-nav-item span {
+      display: none;
+    }
   }
   .bottom-nav-item:hover {
     color: #E5E5E5;
@@ -691,7 +705,8 @@
           setTimeout(() => {
             mobileNotificationPopup.classList.add('hidden');
           }, 200);
-        }      });
+        }      
+      });
     }
   });
 </script>

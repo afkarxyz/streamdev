@@ -506,7 +506,19 @@ app.get('/analytics', isAuthenticated, async (req, res) => {
     res.redirect('/dashboard');
   }
 });
-
+app.get('/logs', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId);
+    res.render('logs', {
+      title: 'System Logs',
+      active: 'logs',
+      user: user
+    });
+  } catch (error) {
+    console.error('Logs error:', error);
+    res.redirect('/dashboard');
+  }
+});
 app.get('/updates', isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
@@ -559,7 +571,6 @@ app.delete('/api/history/:id', isAuthenticated, async (req, res) => {
     });
   }
 });
-
 app.post('/api/history/reuse/:id', isAuthenticated, async (req, res) => {
   try {
     const db = require('./db/database').db;
@@ -1906,6 +1917,102 @@ app.get('/api/github/commits', isAuthenticated, async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Internal server error' 
+    });
+  }
+});
+
+app.get('/api/logs', isAuthenticated, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const logFilePath = path.join(process.cwd(), 'logs', 'app.log');
+    
+    if (!fs.existsSync(logFilePath)) {
+      return res.json({
+        success: true,
+        logs: []
+      });
+    }
+    
+    const logContent = fs.readFileSync(logFilePath, 'utf8');
+    const logLines = logContent.split('\n').filter(line => line.trim() !== '');
+    
+    const logs = logLines.slice(-1000).map(line => {
+      const match = line.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z) \[(\w+)\] (.+)$/);
+      if (match) {
+        const message = match[3];
+        let category = 'general';
+        
+        if (message.includes('[STREAM START]') || message.includes('STREAM START')) {
+          category = 'stream-start';
+        } else if (message.includes('[STREAM STOP]') || message.includes('STREAM STOP')) {
+          category = 'stream-stop';
+        } else if (message.includes('[STREAM ERROR]') || message.includes('STREAM ERROR')) {
+          category = 'stream-error';
+        } else if (message.includes('[FFMPEG]') || message.includes('ffmpeg')) {
+          category = 'ffmpeg';
+        } else if (message.includes('[UPLOAD]') || message.includes('upload')) {
+          category = 'upload';
+        } else if (message.includes('[DOWNLOAD]') || message.includes('download')) {
+          category = 'download';
+        } else if (message.includes('[ANALYTICS]') || message.includes('analytics')) {
+          category = 'analytics';
+        } else if (message.includes('[AUTH]') || message.includes('authentication') || message.includes('login')) {
+          category = 'auth';
+        } else if (message.includes('[API]') || message.includes('/api/')) {
+          category = 'api';
+        } else if (message.includes('ERROR') || message.includes('Error') || message.includes('error')) {
+          category = 'error';
+        }
+        
+        return {
+          timestamp: match[1],
+          level: match[2].toLowerCase(),
+          message: message,
+          category: category
+        };
+      }
+      return {
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: line,
+        category: 'general'
+      };
+    }).reverse();
+    
+    res.json({
+      success: true,
+      logs: logs
+    });
+  } catch (error) {
+    console.error('Error reading logs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to read logs'
+    });
+  }
+});
+
+app.delete('/api/logs', isAuthenticated, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const logFilePath = path.join(process.cwd(), 'logs', 'app.log');
+    
+    if (fs.existsSync(logFilePath)) {
+      fs.writeFileSync(logFilePath, '', 'utf8');
+      console.log('Log file cleared by user');
+    }
+    
+    res.json({
+      success: true,
+      message: 'Logs cleared successfully'
+    });
+  } catch (error) {
+    console.error('Error clearing logs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to clear logs'
     });
   }
 });
