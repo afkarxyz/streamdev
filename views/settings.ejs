@@ -1,0 +1,448 @@
+<% layout('layout') -%>
+  
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <div>
+      <h2 class="text-2xl font-bold">Settings</h2>
+    </div>
+  </div>
+  
+  <div class="mb-6 border-b border-gray-700">
+    <div class="flex flex-wrap -mb-px">
+      <button class="settings-tab active mr-2 py-2 px-4 text-primary border-b-2 border-primary font-medium"
+        data-tab="profile">
+        <i class="ti ti-user mr-2"></i>Profile
+      </button>      
+      <button
+        class="settings-tab mr-2 py-2 px-4 text-gray-400 hover:text-white border-b-2 border-transparent hover:border-gray-700 font-medium"
+        data-tab="security">
+        <i class="ti ti-shield-lock mr-2"></i>Security
+      </button>
+    </div>
+  </div>
+  
+  <div class="bg-gray-800 rounded-lg overflow-hidden">
+    
+    <div id="profile-tab" class="settings-content">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-6">Profile Settings</h3>
+        <form id="profile-form" class="space-y-6" action="/settings/profile" method="post"
+          enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="activeTab" value="profile">
+          
+          <div class="space-y-4">
+            <label class="block text-sm font-medium text-gray-300">Profile Photo</label>
+            <div class="flex items-center space-x-6">
+              <div class="relative">
+                <div class="w-24 h-24 rounded-full bg-dark-700 overflow-hidden border-2 border-gray-700">
+                  <img id="profile-preview" src="<%= user.avatar_path || '/images/default-avatar.jpg' %>"
+                    class="w-full h-full object-cover" alt="Profile Photo"
+                    onerror="this.src='/images/default-avatar.jpg'">
+                </div>
+                <div class="absolute bottom-0 right-0">
+                  <label for="profile-upload"
+                    class="flex items-center justify-center w-8 h-8 rounded-full bg-primary hover:bg-blue-600 cursor-pointer shadow-lg transition-colors">
+                    <i class="ti ti-pencil text-white text-sm"></i>
+                  </label>
+                  <input id="profile-upload" name="avatar" type="file" accept="image/*" class="hidden">
+                </div>
+              </div>
+              <div class="text-sm text-gray-400">
+                <p>Upload a new photo</p>
+                <p class="mt-1">Maximum file size: 2MB</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="username" class="block text-sm font-medium text-gray-300">Username</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <i class="ti ti-user"></i>
+              </span>
+              <input type="text" id="username" name="username"
+                class="bg-dark-900 text-white pl-10 pr-4 py-2 rounded-lg block w-full sm:max-w-md focus:outline-none focus:ring-1 focus:ring-primary"
+                value="<%= user.username %>">
+            </div>
+          </div>
+          
+          <div class="pt-4">
+            <button type="submit"
+              class="px-4 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div id="security-tab" class="settings-content hidden">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-6">Security Settings</h3>
+        <form id="password-form" class="space-y-6" action="/settings/password" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="activeTab" value="security">
+          
+          <div class="space-y-2">
+            <label for="current-password" class="block text-sm font-medium text-gray-300">Current Password</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <i class="ti ti-lock"></i>
+              </span>
+              <input type="password" id="current-password" name="currentPassword"
+                class="bg-dark-900 text-white pl-10 pr-4 py-2 rounded-lg block w-full sm:max-w-md focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Enter your current password">
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="new-password" class="block text-sm font-medium text-gray-300">New Password</label>
+            <div class="relative sm:max-w-md">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <i class="ti ti-lock"></i>
+              </span>
+              <input type="password" id="new-password" name="newPassword"
+                class="bg-dark-900 text-white pl-10 pr-10 py-2 rounded-lg block w-full focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Enter new password">
+              <button type="button"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
+                id="toggle-password">
+                <i class="ti ti-eye"></i>
+              </button>
+            </div>              
+            <div class="mt-2 sm:max-w-md">
+              <div class="w-full bg-gray-700 rounded-full h-1.5">
+                <div id="password-strength" class="bg-gray-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div id="password-feedback" class="text-xs text-gray-400 mt-1">Use 8+ characters with letters, numbers & symbols</div>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="confirm-password" class="block text-sm font-medium text-gray-300">Confirm New Password</label>
+            <div class="relative sm:max-w-md">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <i class="ti ti-lock"></i>
+              </span>
+              <input type="password" id="confirm-password" name="confirmPassword"
+                class="bg-dark-900 text-white pl-10 pr-4 py-2 rounded-lg block w-full focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Confirm new password">
+            </div>
+          </div>
+          
+          <div class="pt-4">
+            <button type="submit"
+              class="px-4 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg transition-colors">
+              Change Password
+            </button>
+          </div>
+        </form>      
+      </div>
+    </div>
+  </div>
+  
+  <div id="toast"
+    class="fixed top-16 right-4 bg-dark-800 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden flex items-center">
+    <i id="toast-icon" class="mr-2"></i>
+    <span id="toast-message"></span>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabs = document.querySelectorAll('.settings-tab');
+      const tabContents = document.querySelectorAll('.settings-content');
+      function activateTab(tabName) {
+        tabs.forEach(tab => tab.classList.remove('active', 'text-primary', 'border-primary'));
+        tabs.forEach(tab => tab.classList.add('text-gray-400', 'border-transparent'));
+        tabContents.forEach(content => content.classList.add('hidden'));
+        const selectedTab = document.querySelector(`.settings-tab[data-tab="${tabName}"]`);
+        if (selectedTab) {
+          selectedTab.classList.add('active', 'text-primary', 'border-primary');
+          selectedTab.classList.remove('text-gray-400', 'border-transparent');
+          const selectedContent = document.getElementById(`${tabName}-tab`);
+          if (selectedContent) {
+            selectedContent.classList.remove('hidden');
+          }
+        }
+      }
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          activateTab(tabName);
+        });      });
+        <% if (typeof activeTab !== 'undefined' && activeTab && (activeTab === 'profile' || activeTab === 'security')) { %>
+        activateTab('<%= activeTab %>');
+      <% } else { %>
+        activateTab('profile');
+      <% } %>
+      
+      const profileUpload = document.getElementById('profile-upload');
+      const profilePreview = document.getElementById('profile-preview');
+      profileUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 2 * 1024 * 1024) {
+            showToast('error', 'Image too large. Maximum size is 2MB.');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            profilePreview.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      const profileForm = document.getElementById('profile-form');
+      profileForm.addEventListener('submit', (e) => {
+        const fileInput = document.getElementById('profile-upload');
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          if (file.size > 2 * 1024 * 1024) {
+            e.preventDefault();
+            showToast('error', 'Image too large. Maximum size is 2MB.');
+            return false;
+          }
+        }
+      });
+      const passwordForm = document.getElementById('password-form');
+      passwordForm.addEventListener('submit', (e) => {
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        if (!currentPassword) {
+          e.preventDefault();
+          showToast('error', 'Please enter your current password.');
+          return false;
+        }
+        if (!newPassword) {
+          e.preventDefault();
+          showToast('error', 'Please enter a new password.');
+          return false;
+        }
+        if (newPassword !== confirmPassword) {
+          e.preventDefault();
+          showToast('error', 'New passwords do not match.');
+          return false;
+        }      });
+      const togglePassword = document.getElementById('toggle-password');
+      const newPasswordField = document.getElementById('new-password');
+      togglePassword.addEventListener('click', () => {
+        if (newPasswordField.type === 'password') {
+          newPasswordField.type = 'text';
+          togglePassword.innerHTML = '<i class="ti ti-eye-off"></i>';
+        } else {
+          newPasswordField.type = 'password';
+          togglePassword.innerHTML = '<i class="ti ti-eye"></i>';
+        }
+      });
+
+      function calculatePasswordStrength(password) {
+        let score = 0;
+        if (password.length >= 8) score += 1;
+        if (password.length >= 12) score += 1;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+        if (/[0-9]/.test(password)) score += 0.5;
+        if (/[^a-zA-Z0-9]/.test(password)) score += 0.5;
+        return {
+          score: Math.min(4, Math.floor(score))
+        };
+      }
+
+      newPasswordField.addEventListener('input', function (e) {
+        const password = e.target.value;
+        const strength = calculatePasswordStrength(password);
+        const strengthBar = document.getElementById('password-strength');
+        const feedback = document.getElementById('password-feedback');
+        
+        strengthBar.style.width = strength.score * 25 + '%';
+        
+        if (strength.score === 0) {
+          strengthBar.className = 'bg-gray-500 h-1.5 rounded-full transition-all duration-300';
+          feedback.textContent = 'Use 8+ characters with letters, numbers & symbols';
+          feedback.className = 'text-xs text-gray-400 mt-1';
+        } else if (strength.score === 1) {
+          strengthBar.className = 'bg-red-500 h-1.5 rounded-full transition-all duration-300';
+          feedback.textContent = 'Too weak - password needs improvement';
+          feedback.className = 'text-xs text-red-400 mt-1';
+        } else if (strength.score === 2) {
+          strengthBar.className = 'bg-yellow-500 h-1.5 rounded-full transition-all duration-300';
+          feedback.textContent = 'Could be stronger - add more variety';
+          feedback.className = 'text-xs text-yellow-500 mt-1';
+        } else if (strength.score === 3) {
+          strengthBar.className = 'bg-green-500 h-1.5 rounded-full transition-all duration-300';
+          feedback.textContent = 'Good password';
+          feedback.className = 'text-xs text-green-500 mt-1';
+        } else {
+          strengthBar.className = 'bg-green-500 h-1.5 rounded-full transition-all duration-300';
+          feedback.textContent = 'Strong password - excellent!';
+          feedback.className = 'text-xs text-green-500 mt-1';
+        }      });
+        function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+        
+        let iconClass = '';
+        if (type === 'success') {
+          iconClass = 'ti ti-check text-green-400';
+        } else if (type === 'error') {
+          iconClass = 'ti ti-x text-red-400';
+        } else if (type === 'warning') {
+          iconClass = 'ti ti-alert-triangle text-yellow-400';
+        } else {
+          iconClass = 'ti ti-info-circle text-blue-400';
+        }
+        
+        toast.innerHTML = `
+          <div class="flex items-center">
+            <i class="${iconClass} mr-2"></i>
+            <span>${message}</span>
+          </div>
+        `;
+        document.body.appendChild(toast);
+
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+          }
+          .animate-fade-out {
+            animation: fadeOut 0.3s ease-in;
+          }
+        `;
+        if (!document.querySelector('style[data-toast-styles]')) {
+          style.setAttribute('data-toast-styles', 'true');
+          document.head.appendChild(style);
+        }
+
+        setTimeout(() => {
+          toast.classList.remove('animate-fade-in');
+          toast.classList.add('animate-fade-out');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        showToast('error', '<%= error %>');
+    <% } %>
+    });
+
+    function createModalDialog(options) {
+    const dialog = document.createElement('div');
+    dialog.id = 'custom-modal';
+    dialog.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300';
+    
+    const themes = {
+      'info': {
+        icon: options.icon || 'ti-info-circle',
+        color: 'text-blue-600',
+        bg: 'bg-blue-600/10',
+        border: 'border-gray-600/50',
+        button: 'bg-blue-600 hover:bg-blue-700',
+        buttonIcon: 'ti-check'
+      },
+      'danger': {
+        icon: options.icon || 'ti-alert-triangle',
+        color: 'text-red-400',
+        bg: 'bg-red-500/10',
+        border: 'border-gray-600/50',
+        button: 'bg-red-500 hover:bg-red-600',
+        buttonIcon: 'ti-trash'
+      },
+      'warning': {
+        icon: options.icon || 'ti-alert-triangle',
+        color: 'text-yellow-400',
+        bg: 'bg-yellow-500/10',
+        border: 'border-yellow-500/50',
+        button: 'bg-yellow-500 hover:bg-yellow-600',
+        buttonIcon: 'ti-alert-circle'
+      },
+    };
+    
+    const theme = themes[options.type || 'info'];
+    
+    dialog.innerHTML = `
+      <div class="transform transition-all duration-300 opacity-0 scale-95 modal-content max-w-md w-full mx-4">
+        <div class="bg-dark-800 rounded-lg shadow-xl border ${theme.border} overflow-hidden">
+          
+          <div class="px-6 py-5 flex items-center">
+            <div class="w-12 h-12 rounded-full ${theme.bg} flex items-center justify-center mr-4 shrink-0">
+              <i class="ti ${theme.icon} ${theme.color} text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-medium text-white">${options.title}</h3>
+              <p class="text-gray-400 text-sm mt-1">${options.message}</p>
+            </div>
+          </div>
+          
+          <div class="px-6 py-4 flex justify-end space-x-3 border-t border-gray-600/50">
+            <button id="modal-cancel-btn" class="px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-gray-300 rounded-lg transition-colors text-sm font-medium flex items-center">
+              <i class="ti ti-x mr-1.5"></i>
+              ${options.cancelText || 'Cancel'}
+            </button>
+            <button id="modal-confirm-btn" class="${options.confirmClass || theme.button} px-4 py-2.5 text-white rounded-lg transition-colors text-sm font-medium flex items-center">
+              <i class="ti ${theme.buttonIcon} mr-1.5"></i>
+              ${options.confirmText || 'Confirm'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    document.body.classList.add('overflow-hidden');
+    
+    setTimeout(() => {
+      const modalContent = dialog.querySelector('.modal-content');
+      if (modalContent) {
+        modalContent.classList.replace('opacity-0', 'opacity-100');
+        modalContent.classList.replace('scale-95', 'scale-100');
+      }
+    }, 10);
+    
+    return new Promise((resolve) => {
+      document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+        resolve({ confirmed: true, closeNow: false });
+      });
+      
+      document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+        closeModalWithAnimation();
+      });
+      
+      document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+          closeModalWithAnimation();
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      });
+      
+      dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) {
+          closeModalWithAnimation();
+        }
+      });
+      
+      function closeModalWithAnimation(confirmed = false) {
+        const modalContent = dialog.querySelector('.modal-content');
+        if (modalContent) {
+          modalContent.classList.replace('opacity-100', 'opacity-0');
+          modalContent.classList.replace('scale-100', 'scale-95');
+        }
+        setTimeout(() => {
+          document.body.classList.remove('overflow-hidden');
+          dialog.remove();
+          resolve({ confirmed, closeNow: true });
+        }, 200);
+      }
+    });
+  }
+
+  </script>
