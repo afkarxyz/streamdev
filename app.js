@@ -10,7 +10,7 @@ const fs = require('fs');
 const csrf = require('csrf');
 const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+const BetterSQLiteStore = require('./db/sessionStore');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
@@ -102,10 +102,11 @@ app.locals.helpers = {
   }
 };
 app.use(session({
-  store: new SQLiteStore({
-    db: 'sessions.db',
-    dir: './db/',
-    table: 'sessions'
+  store: new BetterSQLiteStore({
+    filename: './db/sessions.db',
+    table: 'sessions',
+    autoCleanup: true,
+    cleanupInterval: 3600000
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -461,18 +462,19 @@ app.get('/history', isAuthenticated, async (req, res) => {
   try {
     const db = require('./db/database').db;
     const history = await new Promise((resolve, reject) => {
-      db.all(
-        `SELECT h.*, v.thumbnail_path 
-         FROM stream_history h 
-         LEFT JOIN videos v ON h.video_id = v.id 
-         WHERE h.user_id = ? 
-         ORDER BY h.start_time DESC`,
-        [req.session.userId],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        }
-      );
+      try {
+        const stmt = db.prepare(`
+          SELECT h.*, v.thumbnail_path 
+          FROM stream_history h 
+          LEFT JOIN videos v ON h.video_id = v.id 
+          WHERE h.user_id = ? 
+          ORDER BY h.start_time DESC
+        `);
+        const rows = stmt.all(req.session.userId);
+        resolve(rows);
+      } catch (err) {
+        reject(err);
+      }
     });
     res.render('history', {
       active: 'history',
@@ -531,34 +533,32 @@ app.get('/updates', isAuthenticated, async (req, res) => {
   }
 });
 app.delete('/api/history/:id', isAuthenticated, async (req, res) => {
-  try {
+  try {    
     const db = require('./db/database').db;
     const historyId = req.params.id;
     const history = await new Promise((resolve, reject) => {
-      db.get(
-        'SELECT * FROM stream_history WHERE id = ? AND user_id = ?',
-        [historyId, req.session.userId],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
+      try {
+        const stmt = db.prepare('SELECT * FROM stream_history WHERE id = ? AND user_id = ?');
+        const row = stmt.get(historyId, req.session.userId);
+        resolve(row);
+      } catch (err) {
+        reject(err);
+      }
     });
     if (!history) {
       return res.status(404).json({
         success: false,
         error: 'History entry not found or not authorized'
       });
-    }
+    }    
     await new Promise((resolve, reject) => {
-      db.run(
-        'DELETE FROM stream_history WHERE id = ?',
-        [historyId],
-        function (err) {
-          if (err) reject(err);
-          else resolve(this);
-        }
-      );
+      try {
+        const stmt = db.prepare('DELETE FROM stream_history WHERE id = ?');
+        const result = stmt.run(historyId);
+        resolve(result);
+      } catch (err) {
+        reject(err);
+      }
     });
     res.json({ success: true, message: 'History entry deleted' });
   } catch (error) {
@@ -573,16 +573,14 @@ app.post('/api/history/reuse/:id', isAuthenticated, async (req, res) => {
   try {
     const db = require('./db/database').db;
     const historyId = req.params.id;
-    
-    const history = await new Promise((resolve, reject) => {
-      db.get(
-        'SELECT * FROM stream_history WHERE id = ? AND user_id = ?',
-        [historyId, req.session.userId],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
+      const history = await new Promise((resolve, reject) => {
+      try {
+        const stmt = db.prepare('SELECT * FROM stream_history WHERE id = ? AND user_id = ?');
+        const row = stmt.get(historyId, req.session.userId);
+        resolve(row);
+      } catch (err) {
+        reject(err);
+      }
     });
     
     if (!history) {
@@ -1266,7 +1264,7 @@ const importJobs = {};
 
 async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
   const { GDriveDownloader } = require('./utils/googleDriveDownloader');
-  const { getVideoInfo, generateThumbnail } = require('./utils/videoProcessor');
+  const { generateThumbnail } = require('./utils/videoProcessor');
   const path = require('path');
   const fs = require('fs');
   
@@ -1349,29 +1347,24 @@ async function processGoogleDriveDirectImport(jobId, driveUrl, userId) {
         fs.unlinkSync(finalPath);
       }
       return;
-    }
+    }      
+    const metadata = await getVideoMetadata(result.localFilePath);
     
-    const videoInfo = await getVideoInfo(result.localFilePath);
-    const resolution = videoInfo.resolution || '1280x720';
-    const bitrate = videoInfo.bitrate || null;
-    
-    const thumbnailName = path.basename(result.filename, path.extname(result.filename)) + '.jpg';
+    const uniqueId = `${fileId}_${Date.now()}`;
+    const thumbnailName = `thumb-${uniqueId}.jpg`;
     const thumbnailRelativePath = await generateThumbnail(result.localFilePath, thumbnailName)
       .then(() => `/uploads/thumbnails/${thumbnailName}`)
       .catch(() => null);
-    
-    let format = path.extname(result.filename).toLowerCase().replace('.', '');
-    if (!format) format = 'mp4';
-    
-    const videoData = {
+      const videoData = {
       title: path.basename(result.originalFilename, path.extname(result.originalFilename)),
       filepath: `/uploads/videos/${result.filename}`,
       thumbnail_path: thumbnailRelativePath,
       file_size: result.fileSize,
-      duration: videoInfo.duration,
-      format: format,
-      resolution: resolution,
-      bitrate: bitrate,
+      duration: metadata.duration,
+      format: metadata.format,
+      resolution: metadata.resolution,
+      bitrate: metadata.bitrate,
+      fps: metadata.fps,
       user_id: userId
     };
     
