@@ -1946,6 +1946,7 @@
       });
     }    function startCountdowns() {
       let hasCountdownExpired = false;
+      let countdownInterval = null;
       
       const updateTimers = () => {
         let anyCountdownExpired = false;
@@ -2007,15 +2008,24 @@
         
         if (anyCountdownExpired && !hasCountdownExpired) {
           hasCountdownExpired = true;
-          console.log('Countdown expired, refreshing page in 3 seconds...');
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
+          console.log('Countdown expired, performing full page refresh immediately...');
+          
+          if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+          }
+          
+          document.querySelectorAll('[data-schedule-time]').forEach(el => {
+            el.innerHTML = '<span class="text-blue-400 animate-pulse">Refreshing...</span>';
+          });
+          
+          window.location.reload(true);
+          return;
         }
       };
       
       updateTimers();
-      setInterval(updateTimers, 1000);
+      countdownInterval = setInterval(updateTimers, 1000);
     }
     document.addEventListener('DOMContentLoaded', function () {
       startCountdowns();
