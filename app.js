@@ -10,8 +10,7 @@ const fs = require('fs');
 const csrf = require('csrf');
 const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
-const Database = require('better-sqlite3');
-const BetterSqlite3SessionStore = require('better-sqlite3-session-store')(session);
+const SQLiteStore = require('connect-sqlite3')(session);
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
@@ -104,13 +103,11 @@ app.locals.helpers = {
     return `${hours}:${minutes}:${secs}`;
   }
 };
-
-const sessionDb = new Database('./db/sessions.db');
-
 app.use(session({
-  store: new BetterSqlite3SessionStore({
-    client: sessionDb,
-    ttl: 24 * 60 * 60 * 1000
+  store: new SQLiteStore({
+    db: 'sessions.db',
+    dir: './db/',
+    table: 'sessions'
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
