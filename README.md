@@ -9,7 +9,6 @@ curl -o install.sh https://raw.githubusercontent.com/afkarxyz/streamdev/main/ins
 - Open browser: `http://YOUR_SERVER_IP:7575`
 - Create username & password
 - **Sign out** after login
-- Restart app: `pm2 restart streamflow`
 
 ### Reset Password
 ```bash
@@ -20,14 +19,17 @@ cd streamdev && node reset-password.js
 ```bash
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
+## 🔖 Changelog: 17-06-2025
 
-## Changelog: 15-06-2025
+* Menambahkan Logs.
+* Tampilan lebih minimalis.
+  
+## 🔖 Changelog: 15-06-2025
 
-### 🖥️ Dashboard
+🖥️ Dashboard
 
 * Notifikasi: Sekarang menampilkan riwayat commit dari repositori.
 * Refine Modal New Stream:
-
   * Dropdown pemilihan video diratakan ke kiri.
   * Mengubah posisi fitur "Loop Video".
   * "Advanced Settings" sekarang menggunakan toggle. Akan muncul peringatan ketika diklik.
@@ -36,7 +38,7 @@ cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 * Menambahkan fungsi timer pada scheduled stream.
 * Mengubah posisi status stream dan memperjelas warnanya pada tampilan mobile.
 
-### 📁 Gallery
+📁 Gallery
 
 * Menambahkan informasi total video.
 * Menambahkan tombol "Clear" untuk menghapus semua video sekaligus.
@@ -46,19 +48,19 @@ cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 * Mengubah sort menjadi toggle.
 * Memperbaiki bug informasi ukuran file di atas 1 GB dan paginasi yang sebelumnya kurang akurat.
 
-### 📜 History
+📜 History
 
 * Menambahkan informasi total video.
 * Menambahkan tombol "Clear" untuk menghapus semua video sekaligus.
 * Menambahkan ikon filter berdasarkan platform.
 * Menambahkan tombol untuk menggunakan ulang riwayat stream (reuse stream history).
 
-### ⚙️ Settings
+⚙️ Settings
 
 * Menghapus penggunaan API import Google Drive, diganti dengan direct download.
 * Menambahkan validasi password pada pengaturan keamanan (security settings).
 
-### 🌍 Global
+🌍 Global
 
 * Menghapus dependensi yang tidak terpakai, membersihkan kode yang tidak digunakan, dan memperbarui dependensi.
 * Menambahkan halaman baru "Analytics" untuk memantau performa video tanpa perlu membuka YouTube Studio.
