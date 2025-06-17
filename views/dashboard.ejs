@@ -2004,14 +2004,6 @@
           
           el.innerHTML = timeHTML;
         });
-        
-        if (anyCountdownExpired && !hasCountdownExpired) {
-          hasCountdownExpired = true;
-          console.log('Countdown expired, refreshing page in 3 seconds...');
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        }
       };
       
       updateTimers();
