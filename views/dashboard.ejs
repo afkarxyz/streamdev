@@ -1111,6 +1111,8 @@
     }
     
     function updateSystemStats() {
+      if (window.isRefreshing) return;
+      
       fetch('/api/system-stats')
         .then(response => response.json())
         .then(data => {
@@ -1168,7 +1170,10 @@
     });
     
     updateSystemStats();
-    setInterval(updateSystemStats, 5000);
+    if (window.systemStatsInterval) {
+      clearInterval(window.systemStatsInterval);
+    }
+    window.systemStatsInterval = setInterval(updateSystemStats, 5000);
     document.getElementById('newStreamForm').addEventListener('submit', function (e) {
       e.preventDefault();      
       const videoId = document.getElementById('selectedVideoId').value;
@@ -1944,11 +1949,24 @@
             });
         }
       });
-    }    function startCountdowns() {
+    }    
+    window.isRefreshing = false;
+    window.countdownInterval = null;
+    window.liveTimerInterval = null;
+    window.serverTimeInterval = null;
+    window.systemStatsInterval = null;
+    
+    function startCountdowns() {
+      if (window.countdownInterval) {
+        clearInterval(window.countdownInterval);
+        window.countdownInterval = null;
+      }
+      
       let hasCountdownExpired = false;
-      let countdownInterval = null;
       
       const updateTimers = () => {
+        if (window.isRefreshing) return;
+        
         let anyCountdownExpired = false;
         
         document.querySelectorAll('[data-schedule-time]').forEach(el => {
@@ -2006,26 +2024,41 @@
           el.innerHTML = timeHTML;
         });
         
-        if (anyCountdownExpired && !hasCountdownExpired) {
+        if (anyCountdownExpired && !hasCountdownExpired && !window.isRefreshing) {
           hasCountdownExpired = true;
+          window.isRefreshing = true;
           console.log('Countdown expired, performing full page refresh immediately...');
           
-          if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
+          if (window.countdownInterval) {
+            clearInterval(window.countdownInterval);
+            window.countdownInterval = null;
+          }
+          if (window.liveTimerInterval) {
+            clearInterval(window.liveTimerInterval);
+            window.liveTimerInterval = null;
+          }
+          if (window.serverTimeInterval) {
+            clearInterval(window.serverTimeInterval);
+            window.serverTimeInterval = null;
+          }
+          if (window.systemStatsInterval) {
+            clearInterval(window.systemStatsInterval);
+            window.systemStatsInterval = null;
           }
           
           document.querySelectorAll('[data-schedule-time]').forEach(el => {
             el.innerHTML = '<span class="text-blue-400 animate-pulse">Refreshing...</span>';
           });
           
-          window.location.reload(true);
+          setTimeout(() => {
+            window.location.reload(true);
+          }, 100);
           return;
         }
       };
       
       updateTimers();
-      countdownInterval = setInterval(updateTimers, 1000);
+      window.countdownInterval = setInterval(updateTimers, 1000);
     }
     document.addEventListener('DOMContentLoaded', function () {
       startCountdowns();
@@ -2511,7 +2544,14 @@
       }
     }
     function startLiveTimers() {
-      setInterval(() => {
+      if (window.liveTimerInterval) {
+        clearInterval(window.liveTimerInterval);
+        window.liveTimerInterval = null;
+      }
+      
+      window.liveTimerInterval = setInterval(() => {
+        if (window.isRefreshing) return;
+        
         document.querySelectorAll('.live-duration').forEach(el => {
           const startTime = new Date(el.dataset.startTime);
           const now = new Date();
@@ -2523,6 +2563,8 @@
         });
       }, 1000);
     }    function updateServerTime() {
+      if (window.isRefreshing) return;
+      
       fetch('/api/server-time')
         .then(response => response.json())
         .then(data => {
@@ -2599,7 +2641,10 @@
     document.addEventListener('DOMContentLoaded', function () {
       updateServerTime();
       updateLocationInfo();
-      setInterval(updateServerTime, 1000);
+      if (window.serverTimeInterval) {
+        clearInterval(window.serverTimeInterval);
+      }
+      window.serverTimeInterval = setInterval(updateServerTime, 1000);
     });
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.querySelector('input[placeholder="Search streams..."]');
