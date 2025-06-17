@@ -19,7 +19,7 @@ cd streamdev && node reset-password.js
 ```bash
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
-## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/9c78715f0df5135481166e131ff7737d36133294)
+## 🔖 Changelog: [17-06-2025](https://github.com/afkarxyz/streamdev/tree/b90cbe9ca1a19958a93ca7f7bd40b42ea67ada94)
 
 * Menambahkan Logs.
 * Tampilan lebih minimalis.
