@@ -19,14 +19,12 @@ const { checkIfUsersExist } = require('./db/database');
 const systemMonitor = require('./services/systemMonitor');
 const { uploadVideo } = require('./middleware/uploadMiddleware');
 const { ensureDirectories, paths } = require('./utils/storage');
-const { getVideoInfo, generateThumbnail } = require('./utils/videoProcessor');
+const { getVideoInfo } = require('./utils/videoProcessor');
 const Video = require('./models/Video');
 const VideoAnalytics = require('./utils/videoAnalytics');
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const { getVideoMetadata, generateThumbnail } = require('./utils/ffmpegUtils');
 const streamingService = require('./services/streamingService');
 const schedulerService = require('./services/schedulerService');
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 process.on('unhandledRejection', (reason, promise) => {
   console.error('-----------------------------------');
   console.error('UNHANDLED REJECTION AT:', promise);
@@ -1053,70 +1051,43 @@ app.post('/api/videos/upload', isAuthenticated, videoUpload.single('video'), asy
     let title = path.parse(req.file.originalname).name;
     const filePath = `/uploads/videos/${req.file.filename}`;
     const fullFilePath = path.join(__dirname, 'public', filePath);
-    const fileSize = req.file.size;
-    await new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(fullFilePath, (err, metadata) => {
-        if (err) {
-          console.error('Error extracting metadata:', err);
-          return reject(err);
-        }
-        const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
-        const duration = metadata.format.duration || 0;
-        const format = metadata.format.format_name || '';
-        const resolution = videoStream ? `${videoStream.width}x${videoStream.height}` : '';
-        const bitrate = metadata.format.bit_rate ?
-          Math.round(parseInt(metadata.format.bit_rate) / 1000) :
-          null;
-        let fps = null;
-        if (videoStream && videoStream.avg_frame_rate) {
-          const fpsRatio = videoStream.avg_frame_rate.split('/');
-          if (fpsRatio.length === 2 && parseInt(fpsRatio[1]) !== 0) {
-            fps = Math.round((parseInt(fpsRatio[0]) / parseInt(fpsRatio[1]) * 100)) / 100;
-          } else {
-            fps = parseInt(fpsRatio[0]) || null;
-          }
-        }
-        const thumbnailFilename = `thumb-${path.parse(req.file.filename).name}.jpg`;
-        const thumbnailPath = `/uploads/thumbnails/${thumbnailFilename}`;
-        ffmpeg(fullFilePath)
-          .screenshots({
-            timestamps: ['10%'],
-            filename: thumbnailFilename,
-            folder: path.join(__dirname, 'public', 'uploads', 'thumbnails'),
-            size: '854x480'
-          })
-          .on('end', async () => {
-            try {
-              const videoData = {
-                title,
-                filepath: filePath,
-                thumbnail_path: thumbnailPath,
-                file_size: fileSize,
-                duration,
-                format,
-                resolution,
-                bitrate,
-                fps,
-                user_id: req.session.userId
-              };
-              const video = await Video.create(videoData);
-              res.json({
-                success: true,
-                message: 'Video uploaded successfully',
-                video
-              });
-              resolve();
-            } catch (dbError) {
-              console.error('Database error:', dbError);
-              reject(dbError);
-            }
-          })
-          .on('error', (err) => {
-            console.error('Error creating thumbnail:', err);
-            reject(err);
-          });
+    const fileSize = req.file.size;    try {
+      const metadata = await getVideoMetadata(fullFilePath);
+      
+      const thumbnailFilename = `thumb-${path.parse(req.file.filename).name}.jpg`;
+      const thumbnailPath = `/uploads/thumbnails/${thumbnailFilename}`;
+      const fullThumbnailPath = path.join(__dirname, 'public', 'uploads', 'thumbnails', thumbnailFilename);
+        await generateThumbnail(fullFilePath, fullThumbnailPath, {
+        timestamp: '10',
+        size: '854x480'
       });
-    });
+
+      const videoData = {
+        title,
+        filepath: filePath,
+        thumbnail_path: thumbnailPath,
+        file_size: fileSize,
+        duration: metadata.duration,
+        format: metadata.format,
+        resolution: metadata.resolution,
+        bitrate: metadata.bitrate,
+        fps: metadata.fps,
+        user_id: req.session.userId
+      };
+      
+      const video = await Video.create(videoData);
+      res.json({
+        success: true,
+        message: 'Video uploaded successfully',
+        video
+      });
+    } catch (metadataError) {
+      console.error('Error processing video:', metadataError);
+      res.status(500).json({ 
+        error: 'Failed to process video metadata',
+        details: metadataError.message 
+      });
+    }
   } catch (error) {
     console.error('Upload error details:', error);
     res.status(500).json({ 
