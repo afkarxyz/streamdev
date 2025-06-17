@@ -37,70 +37,60 @@
             <i class="ti ti-api mr-1"></i>
             API
           </button>
-        </div>        
+        </div>          
         <div class="flex gap-2">
           <button id="clear-logs" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-sm min-w-[80px]">
             <i class="ti ti-trash mr-1"></i>
             Clear
           </button>
-          <button id="auto-scroll" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors text-sm min-w-[100px]">
-            <i class="ti ti-arrows-down mr-1"></i>
-            Auto Scroll
-          </button>
         </div>
-      </div>
-
+      </div>      
       <!-- Mobile View -->
-      <div class="sm:hidden space-y-3">
-        <!-- Filter Dropdown -->
-        <div class="relative">
-          <button id="mobile-filter-dropdown" class="w-full flex items-center justify-between px-3 py-2 bg-dark-700 border border-gray-600 rounded-md text-white text-sm">
-            <div class="flex items-center">
-              <i id="mobile-filter-icon" class="ti ti-list mr-2"></i>
-              <span id="mobile-filter-text">All Logs</span>
+      <div class="sm:hidden">
+        <!-- Filter and Clear in one row -->
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <button id="mobile-filter-dropdown" class="w-full flex items-center justify-between px-3 py-2 bg-dark-700 border border-gray-600 rounded-md text-white text-sm">
+              <div class="flex items-center">
+                <i id="mobile-filter-icon" class="ti ti-list mr-2"></i>
+                <span id="mobile-filter-text">All Logs</span>
+              </div>
+              <i class="ti ti-chevron-down"></i>
+            </button>
+            <div id="mobile-filter-menu" class="absolute top-full left-0 right-0 mt-1 bg-dark-700 border border-gray-600 rounded-md shadow-lg z-10 hidden">
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600 active" data-level="all" data-icon="ti-list">
+                <i class="ti ti-list mr-2"></i>
+                All Logs
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="error" data-icon="ti-alert-circle">
+                <i class="ti ti-alert-circle mr-2"></i>
+                Errors
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="warn" data-icon="ti-alert-triangle">
+                <i class="ti ti-alert-triangle mr-2"></i>
+                Warnings
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="info" data-icon="ti-info-circle">
+                <i class="ti ti-info-circle mr-2"></i>
+                Info
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="stream" data-icon="ti-broadcast">
+                <i class="ti ti-broadcast mr-2"></i>
+                Stream
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="ffmpeg" data-icon="ti-video">
+                <i class="ti ti-video mr-2"></i>
+                FFmpeg
+              </button>
+              <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="api" data-icon="ti-api">
+                <i class="ti ti-api mr-2"></i>
+                API
+              </button>
             </div>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div id="mobile-filter-menu" class="absolute top-full left-0 right-0 mt-1 bg-dark-700 border border-gray-600 rounded-md shadow-lg z-10 hidden">
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600 active" data-level="all" data-icon="ti-list">
-              <i class="ti ti-list mr-2"></i>
-              All Logs
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="error" data-icon="ti-alert-circle">
-              <i class="ti ti-alert-circle mr-2"></i>
-              Errors
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="warn" data-icon="ti-alert-triangle">
-              <i class="ti ti-alert-triangle mr-2"></i>
-              Warnings
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-level="info" data-icon="ti-info-circle">
-              <i class="ti ti-info-circle mr-2"></i>
-              Info
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="stream" data-icon="ti-broadcast">
-              <i class="ti ti-broadcast mr-2"></i>
-              Stream
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="ffmpeg" data-icon="ti-video">
-              <i class="ti ti-video mr-2"></i>
-              FFmpeg
-            </button>
-            <button class="mobile-filter-option w-full flex items-center px-3 py-2 text-white text-sm hover:bg-dark-600" data-category="api" data-icon="ti-api">
-              <i class="ti ti-api mr-2"></i>
-              API
-            </button>
           </div>
-        </div>        
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-2 gap-2">
-          <button id="mobile-clear-logs" class="flex items-center justify-center px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-sm">
+          <button id="mobile-clear-logs" class="flex items-center justify-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-sm min-w-[80px]">
             <i class="ti ti-trash mr-1 text-sm"></i>
             <span>Clear</span>
-          </button>
-          <button id="mobile-auto-scroll" class="flex items-center justify-center px-2 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors text-sm">
-            <i class="ti ti-arrows-down mr-1 text-sm"></i>
-            <span>Auto Scroll</span>
           </button>
         </div>
       </div>
@@ -428,11 +418,7 @@
     min-height: 44px; 
   }
   
-  .grid-cols-2 button {
-    min-height: 44px; 
-  }
-  
-  #mobile-filter-dropdown {
+  #mobile-filter-dropdown, #mobile-clear-logs {
     min-height: 44px;
   }
 }
@@ -444,7 +430,6 @@ class LogViewer {
     this.logs = [];
     this.filteredLogs = [];
     this.currentFilter = 'all';
-    this.autoScroll = false;
     this.refreshInterval = null;
     
     this.initializeElements();
@@ -456,8 +441,8 @@ class LogViewer {
   
   initializeMobileState() {
     this.setMobileFilter('all', 'ti-list', 'All Logs');
-    this.updateMobileAutoScrollButton();
   }  
+  
   initializeElements() {
     this.logContainer = document.getElementById('log-container');
     this.logContent = document.getElementById('log-content');
@@ -471,7 +456,6 @@ class LogViewer {
     this.debugCount = document.getElementById('debug-count');
     this.refreshBtn = document.getElementById('refresh-logs');
     this.clearBtn = document.getElementById('clear-logs');
-    this.autoScrollBtn = document.getElementById('auto-scroll');
     this.filterBtns = document.querySelectorAll('.log-filter-btn');
     
     this.mobileFilterDropdown = document.getElementById('mobile-filter-dropdown');
@@ -481,12 +465,10 @@ class LogViewer {
     this.mobileFilterOptions = document.querySelectorAll('.mobile-filter-option');
     
     this.mobileClearBtn = document.getElementById('mobile-clear-logs');
-    this.mobileAutoScrollBtn = document.getElementById('mobile-auto-scroll');
-  }  
-  
+  }
+    
   bindEvents() {
     this.clearBtn.addEventListener('click', () => this.clearLogs());
-    this.autoScrollBtn.addEventListener('click', () => this.toggleAutoScroll());
     
     this.filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -513,10 +495,8 @@ class LogViewer {
         this.setMobileFilter(filterValue, iconClass, text);
         this.setFilter(filterValue);
         this.hideMobileFilterMenu();
-      });
-    });    
+      });    });    
     this.mobileClearBtn.addEventListener('click', () => this.clearLogs());
-    this.mobileAutoScrollBtn.addEventListener('click', () => this.toggleMobileAutoScroll());
     
     document.addEventListener('click', () => {
       this.hideMobileFilterMenu();
@@ -549,28 +529,10 @@ class LogViewer {
         option.style.backgroundColor = '#374151';
       } else {
         option.style.backgroundColor = '';
-      }
-    });
+      }    });
   }
   
-  toggleMobileAutoScroll() {
-    this.autoScroll = !this.autoScroll;
-    this.updateMobileAutoScrollButton();
-    
-    if (this.autoScroll) {
-      this.scrollToBottom();
-    }
-  }
-  
-  updateMobileAutoScrollButton() {
-    if (this.autoScroll) {
-      this.mobileAutoScrollBtn.classList.remove('bg-gray-600');
-      this.mobileAutoScrollBtn.classList.add('bg-primary');
-    } else {
-      this.mobileAutoScrollBtn.classList.remove('bg-primary');
-      this.mobileAutoScrollBtn.classList.add('bg-gray-600');
-    }
-  }    async loadLogs() {
+  async loadLogs() {
     try {
       const response = await fetch('/api/logs');
       const data = await response.json();
@@ -705,13 +667,8 @@ class LogViewer {
           </div>
         </div>
       `;
-    }).join('');
-
+    }).join('');    
     this.logContent.innerHTML = html;
-    
-    if (this.autoScroll) {
-      this.scrollToBottom();
-    }
   }
 
   updateStats() {
@@ -776,25 +733,7 @@ class LogViewer {
           confirmText: 'OK',
           showCancel: false
         });
-      }
-    }
-  }
-
-  toggleAutoScroll() {
-    this.autoScroll = !this.autoScroll;
-    
-    this.autoScrollBtn.classList.toggle('bg-primary', this.autoScroll);
-    this.autoScrollBtn.classList.toggle('bg-gray-600', !this.autoScroll);
-    
-    this.updateMobileAutoScrollButton();
-    
-    if (this.autoScroll) {
-      this.scrollToBottom();
-    }
-  }
-
-  scrollToBottom() {
-    this.logContainer.scrollTop = this.logContainer.scrollHeight;
+      }    }
   }
 
   startAutoRefresh() {
