@@ -93,8 +93,105 @@
             <span>Clear</span>
           </button>
         </div>
-      </div>
+      </div>    
     </div>    
+    
+    <!-- Log Stats -->
+    <div class="mb-6">      
+      <!-- Desktop View -->
+      <div class="hidden sm:grid grid-cols-2 md:grid-cols-6 gap-4">          
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-list-details text-green-400 mr-2"></i>
+            <div class="text-xs text-green-400 font-medium">Total Logs</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="total-logs">0</div>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-alert-circle text-red-400 mr-2"></i>
+            <div class="text-xs text-red-400 font-medium">Errors</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="error-count">0</div>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-alert-triangle text-amber-400 mr-2"></i>
+            <div class="text-xs text-amber-400 font-medium">Warnings</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="warn-count">0</div>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-info-circle text-white mr-2"></i>
+            <div class="text-xs text-white font-medium">Info</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="info-count">0</div>
+        </div>        
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-file-text text-white mr-2"></i>
+            <div class="text-xs text-white font-medium">Log</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="log-count">0</div>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4">
+          <div class="flex items-center mb-2">
+            <i class="ti ti-bug text-white mr-2"></i>
+            <div class="text-xs text-white font-medium">Debug</div>
+          </div>
+          <div class="text-2xl font-bold text-gray-400" id="debug-count">0</div>
+        </div>
+      </div>        
+      <!-- Mobile View - Compact Single Card -->
+      <div class="sm:hidden bg-dark-800 rounded-lg p-3 border border-gray-700">
+        <div class="grid grid-cols-3 gap-2">            
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-list-details text-green-400 text-xs mr-1"></i>
+              <span class="text-xs text-green-400 font-medium">Total Logs</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="total-logs-mobile">0</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-alert-circle text-red-400 text-xs mr-1"></i>
+              <span class="text-xs text-red-400 font-medium">Errors</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="error-count-mobile">0</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-alert-triangle text-amber-400 text-xs mr-1"></i>
+              <span class="text-xs text-amber-400 font-medium">Warnings</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="warn-count-mobile">0</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-info-circle text-white text-xs mr-1"></i>
+              <span class="text-xs text-white font-medium">Info</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="info-count-mobile">0</span>
+          </div>          
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-file-text text-white text-xs mr-1"></i>
+              <span class="text-xs text-white font-medium">Log</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="log-count-mobile">0</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center mb-1">
+              <i class="ti ti-bug text-white text-xs mr-1"></i>
+              <span class="text-xs text-white font-medium">Debug</span>
+            </div>
+            <span class="text-sm font-bold text-gray-400" id="debug-count-mobile">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- Log Container -->
     <div class="bg-dark-800 rounded-lg border border-gray-700 overflow-hidden">
       <div class="bg-dark-700 px-3 sm:px-4 py-2 border-b border-gray-700">
@@ -104,10 +201,10 @@
             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1 sm:mr-2"></span>
             <span id="log-status">Connected</span>
           </div>
-        </div>
+        </div>      
       </div>
       
-      <div id="log-container" class="h-64 sm:h-96 overflow-y-auto bg-black text-green-400 font-mono text-xs sm:text-sm">
+      <div id="log-container" class="h-80 sm:h-[32rem] overflow-y-auto bg-black text-green-400 font-mono text-xs sm:text-sm">
         <div id="log-content" class="p-2 sm:p-4">
           <div class="flex items-center justify-center h-full text-gray-500">
             <div class="text-center">
@@ -116,34 +213,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Log Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mt-6">
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-white" id="total-logs">0</div>
-        <div class="text-xs text-gray-400">Total Logs</div>
-      </div>
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-red-400" id="error-count">0</div>
-        <div class="text-xs text-gray-400">Errors</div>
-      </div>
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-yellow-400" id="warn-count">0</div>
-        <div class="text-xs text-gray-400">Warnings</div>
-      </div>
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-blue-400" id="info-count">0</div>
-        <div class="text-xs text-gray-400">Info</div>
-      </div>
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-green-400" id="log-count">0</div>
-        <div class="text-xs text-gray-400">Log</div>
-      </div>
-      <div class="bg-dark-800 rounded-lg p-4">
-        <div class="text-2xl font-bold text-purple-400" id="debug-count">0</div>
-        <div class="text-xs text-gray-400">Debug</div>
       </div>
     </div>
   </div>
@@ -551,6 +620,7 @@ class LogViewer {
       this.showError('Failed to load logs: ' + error.message);
     }
   }
+
   setFilter(level) {
     this.currentFilter = level;
     
@@ -693,7 +763,21 @@ class LogViewer {
     this.infoCount.textContent = stats.info;
     this.logCount.textContent = stats.log;
     this.debugCount.textContent = stats.debug;
-  }  
+    
+    const totalLogsMobile = document.getElementById('total-logs-mobile');
+    const errorCountMobile = document.getElementById('error-count-mobile');
+    const warnCountMobile = document.getElementById('warn-count-mobile');
+    const infoCountMobile = document.getElementById('info-count-mobile');
+    const logCountMobile = document.getElementById('log-count-mobile');
+    const debugCountMobile = document.getElementById('debug-count-mobile');
+    
+    if (totalLogsMobile) totalLogsMobile.textContent = stats.total;
+    if (errorCountMobile) errorCountMobile.textContent = stats.error;
+    if (warnCountMobile) warnCountMobile.textContent = stats.warn;
+    if (infoCountMobile) infoCountMobile.textContent = stats.info;
+    if (logCountMobile) logCountMobile.textContent = stats.log;
+    if (debugCountMobile) debugCountMobile.textContent = stats.debug;
+  }
   
   async clearLogs() {
     const result = await this.createModalDialog({
