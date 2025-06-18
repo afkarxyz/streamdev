@@ -20,7 +20,7 @@ cd streamdev && node reset-password.js
 cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
 ```
 
-## 🔖 Changelog: 17-06-2025
+## 🔖 Changelog: 18-06-2025
 
 🖥️ Dashboard
 
@@ -31,7 +31,7 @@ cd ~/streamdev/logs && curl -F'file=@app.log' https://0x0.st
   * "Advanced Settings" sekarang menggunakan toggle. Akan muncul peringatan ketika diklik.
   * Menambahkan informasi zona waktu, lokasi, dan IP.
 * Menambahkan tab pada "Streaming Status".
-* Menambahkan fungsi timer pada scheduled stream.
+* Menambahkan estimasi waktu dimulai pada scheduled stream.
 * Mengubah posisi status stream dan memperjelas warnanya pada tampilan mobile.
 
 📁 Gallery
