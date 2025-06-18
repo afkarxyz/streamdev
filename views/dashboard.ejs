@@ -990,40 +990,6 @@
       }
     }
 
-    .countdown-timer {
-      font-family: 'Courier New', monospace;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-
-    .countdown-part {
-      display: inline-block;
-      position: relative;
-      margin: 0 2px;
-      font-weight: 700;
-      font-size: 1.1em;
-    }
-
-    .countdown-label {
-      font-size: 0.7em;
-      font-weight: 500;
-      opacity: 0.8;
-      margin-left: 1px;
-    }
-
-    .countdown-timer .countdown-part:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 2px;
-      height: 2px;
-      background: currentColor;
-      border-radius: 50%;
-      opacity: 0.6;
-    }
-
     .stream-tab {
       position: relative;
       overflow: hidden;
@@ -1376,6 +1342,9 @@
       function displayStreams(streams) {
         displayMobileStreams(streams);
         displayDesktopStreams(streams);
+        setTimeout(() => {
+          startTimeEstimator();
+        }, 100);
       }
       function displayMobileStreams(streams) {
         const mobileContainer = document.querySelector('.block.md\\:hidden.space-y-4');
@@ -1496,22 +1465,9 @@
             <span>Duration: ${formattedDuration}</span>
           </div>          
           ${stream.status === 'scheduled' ? `
-          <div class="bg-yellow-500/10 rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center text-yellow-500">
-                <i class="ti ti-calendar-event mr-2"></i>
-                <span class="font-semibold">Starts in:</span>
-              </div>
-              <i class="ti ti-clock text-yellow-500 animate-pulse"></i>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-white countdown-timer" data-schedule-time="${stream.schedule_time}">
-                Loading...
-              </div>
-              <div class="text-sm text-yellow-400 mt-1">
-                ${scheduleDate} at ${scheduleTime}
-              </div>
-            </div>
+          <div class="flex items-center text-sm text-gray-400 mb-3">
+            <i class="ti ti-calendar mr-1.5"></i>
+            <span>${scheduleDate} at ${scheduleTime} • <span class="text-yellow-500 time-estimate" data-schedule-time="${stream.schedule_time}">Loading...</span></span>
           </div>` : `
           <div class="flex items-center text-sm text-gray-400 mb-3">
             <i class="ti ti-calendar mr-1.5"></i>
@@ -1604,18 +1560,8 @@
         <td class="px-6 py-4 whitespace-nowrap">
           ${scheduleDate
             ? stream.status === 'scheduled' 
-              ? `<div class="bg-yellow-500/10 rounded-lg p-3">
-                   <div class="flex items-center text-yellow-500 mb-1">
-                     <i class="ti ti-clock animate-pulse mr-1"></i>
-                     <span class="text-xs font-semibold">Starts in:</span>
-                   </div>
-                   <div class="text-sm font-bold text-white countdown-timer" data-schedule-time="${stream.schedule_time}">
-                     Loading...
-                   </div>
-                   <div class="text-xs text-yellow-400 mt-1">
-                     ${formatDate(scheduleDate)} at ${formatTime(scheduleDate)}
-                   </div>
-                 </div>`
+              ? `<div class="text-sm text-yellow-500 font-medium">${formatDate(scheduleDate)}</div>
+                 <div class="text-xs text-gray-400">${formatTime(scheduleDate)} • <span class="text-yellow-500 time-estimate" data-schedule-time="${stream.schedule_time}">Loading...</span></div>`
               : `<div class="text-sm text-yellow-500 font-medium">${formatDate(scheduleDate)}</div>
                  <div class="text-xs text-gray-400">${formatTime(scheduleDate)}</div>`
             : `<div class="text-sm">--</div>`}
@@ -1944,73 +1890,48 @@
             });
         }
       });
-    }    function startCountdowns() {
-      let hasCountdownExpired = false;
+    }    let timeEstimatorInterval = null;
+    
+    function startTimeEstimator() {
+      if (timeEstimatorInterval) {
+        clearInterval(timeEstimatorInterval);
+      }
       
-      const updateTimers = () => {
-        let anyCountdownExpired = false;
-        
-        document.querySelectorAll('[data-schedule-time]').forEach(el => {
-          if (el.classList.contains('countdown-timer')) return;
-          
+      const updateTimeEstimate = () => {
+        document.querySelectorAll('.time-estimate[data-schedule-time]').forEach(el => {
           const scheduleTime = new Date(el.dataset.scheduleTime);
           const now = new Date();
           const diff = scheduleTime - now;
+          
           if (diff <= 0) {
-            el.textContent = 'Starting soon...';
-            anyCountdownExpired = true;
+            el.textContent = 'Starting Soon!';
             return;
           }
+          
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
           let timeText = '';
-          if (days > 0) timeText = `${days}d ${hours}h ${minutes}m`;
-          else if (hours > 0) timeText = `${hours}h ${minutes}m ${seconds}s`;
-          else timeText = `${minutes}m ${seconds}s`;
-          el.textContent = `Starts in: ${timeText}`;
-        });
-        
-        document.querySelectorAll('.countdown-timer[data-schedule-time]').forEach(el => {
-          const scheduleTime = new Date(el.dataset.scheduleTime);
-          const now = new Date();
-          const diff = scheduleTime - now;
-          
-          if (diff <= 0) {
-            el.innerHTML = '<span class="text-green-400 animate-pulse">Starting Soon!</span>';
-            anyCountdownExpired = true;
-            return;
-          }
-          
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-          
-          let timeHTML = '';
           if (days > 0) {
-            timeHTML = `<span class="countdown-part">${days}<span class="countdown-label">d</span></span> 
-                       <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label">h</span></span> 
-                       <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span>`;
+            timeText = `${days}d ${hours}h ${minutes}m`;
           } else if (hours > 0) {
-            timeHTML = `<span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label">h</span></span> 
-                       <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span> 
-                       <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label">s</span></span>`;
+            timeText = `${hours}h ${minutes}m`;
+          } else if (minutes > 0) {
+            timeText = `${minutes}m`;
           } else {
-            timeHTML = `<span class="countdown-part text-orange-400">${minutes.toString().padStart(2, '0')}<span class="countdown-label">m</span></span> 
-                       <span class="countdown-part text-orange-400">${seconds.toString().padStart(2, '0')}<span class="countdown-label">s</span></span>`;
+            timeText = 'segera dimulai';
           }
           
-          el.innerHTML = timeHTML;
+          el.textContent = timeText;
         });
       };
       
-      updateTimers();
-      setInterval(updateTimers, 1000);
+      updateTimeEstimate();
+      timeEstimatorInterval = setInterval(updateTimeEstimate, 60000);
     }
+    
     document.addEventListener('DOMContentLoaded', function () {
-      startCountdowns();
     });
     let editSelectedVideoData = null;
     let currentEditOrientation = 'horizontal';
@@ -2436,7 +2357,6 @@
         });
       }
       startLiveTimers();
-      startCountdowns();
     });
     const editPlatformSelector = document.getElementById('editPlatformSelector');
     const editPlatformDropdown = document.getElementById('editPlatformDropdown');
